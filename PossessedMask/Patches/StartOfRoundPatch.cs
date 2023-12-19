@@ -125,6 +125,8 @@ namespace PossessedMask.Patches
                 }
 
                 Plugin.Log.LogInfo("Switching to inventory slot " + switchToIndex);
+                if (localPlayer.ItemSlots[localPlayer.currentItemSlot].itemProperties.twoHanded)
+                    localPlayer.DiscardHeldObject();
                 if (Random.Range(0f, 1f) < 0.25f)
                     localPlayer.itemAudio.PlayOneShot(slotSwitchSounds[Random.Range(0, slotSwitchSounds.Length)], localPlayer.itemAudio.volume * 0.25f);
                 localPlayer.SwitchToItemSlot(switchToIndex);
