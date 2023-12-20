@@ -1,10 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using BepInEx;
 using GameNetcodeStuff;
 using HarmonyLib;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace PossessedMask.Patches
 {
@@ -144,7 +146,7 @@ namespace PossessedMask.Patches
             else if (timeHeldByPlayer > Plugin.timeToStartSwitchingSlots.Value && 
                      nextTimeToSwitchSlot <= 0f)
             {
-                Plugin.Log.LogInfo("Player is not holding a mask, switching to longest held mask");
+                Plugin.Log.LogMessage("Player is not holding a mask, switching to closest held mask");
 
                 int numOfSlots = localPlayer.ItemSlots.Length;
                 GrabbableObject[] inventory = localPlayer.ItemSlots;
@@ -152,21 +154,28 @@ namespace PossessedMask.Patches
                 int switchToIndex = -1;
                 for (int i = 1; i <= numOfSlots / 2; i++)
                 {
-                    GrabbableObject item = inventory[(currIndex + i) % numOfSlots];
+                    int checkIndex = ((currIndex + i) % numOfSlots + numOfSlots) % numOfSlots;
+                    Plugin.Log.LogMessage($"Checking slot: {checkIndex}");
+                    GrabbableObject item = inventory[checkIndex];
                     if (item != null && item.GetType() == typeof(HauntedMaskItem))
                     {
-                        switchToIndex = (currIndex + 1) % numOfSlots;
+                        Plugin.Log.LogMessage("Success! (+1)");
+                        switchToIndex = ((currIndex + 1) % numOfSlots + numOfSlots) % numOfSlots;
                         break;
                     }
-                    item = inventory[(currIndex - i) % numOfSlots];
+                    
+                    checkIndex = ((currIndex - i) % numOfSlots + numOfSlots) % numOfSlots;
+                    Plugin.Log.LogMessage($"Checking slot: {checkIndex}");
+                    item = inventory[checkIndex];
                     if (item != null && item.GetType() == typeof(HauntedMaskItem))
                     {
-                        switchToIndex = (currIndex - 1) % numOfSlots;
+                        Plugin.Log.LogMessage("Success! (-1)");
+                        switchToIndex = ((currIndex - 1) % numOfSlots + numOfSlots) % numOfSlots;
                         break;
                     }
                 }
 
-                Plugin.Log.LogInfo($"Switching to inventory slot {switchToIndex}, current item is two handed: {currentHeld?.itemProperties.twoHanded}");
+                Plugin.Log.LogMessage($"Switching to inventory slot {switchToIndex}, current item is two handed: {currentHeld?.itemProperties.twoHanded}");
                 bool currentIsTwoHanded = currentHeld != null && currentHeld.itemProperties.twoHanded;
                 localPlayer.StartCoroutine(
                     SwitchSlot(
