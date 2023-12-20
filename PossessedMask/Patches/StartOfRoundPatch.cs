@@ -150,7 +150,7 @@ namespace PossessedMask.Patches
                 GrabbableObject[] inventory = localPlayer.ItemSlots;
                 int currIndex = localPlayer.currentItemSlot;
                 int switchToIndex = -1;
-                for (int i = 1; i < numOfSlots / 2; i++)
+                for (int i = 1; i <= numOfSlots / 2; i++)
                 {
                     GrabbableObject item = inventory[(currIndex + i) % numOfSlots];
                     if (item != null && item.GetType() == typeof(HauntedMaskItem))
