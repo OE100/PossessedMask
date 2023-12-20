@@ -5,6 +5,10 @@ Tweaks spawn chances of masks to allow them to spawn on all moons.
 
 # Releases
 
+# Version 1.0.5
+
+- Each day reset scaling variables back to config values.
+
 # Version 1.0.4
 
 - More error catching and validation.
