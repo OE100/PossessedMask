@@ -5,6 +5,10 @@ Tweaks spawn chances of masks to allow them to spawn on all moons.
 
 # Releases
 
+# Version 1.0.4
+
+- More error catching and validation.
+
 # Version 1.0.3
 
 - Fixed bug where activatable items didn't turn off when switched from.
