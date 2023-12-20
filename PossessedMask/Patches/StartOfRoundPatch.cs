@@ -172,6 +172,9 @@ namespace PossessedMask.Patches
                     }
                 }
 
+                if (currentHeld != null && !currentHeld.deactivated)
+                    currentHeld.ItemActivate(false, false);                    
+                
                 Plugin.Log.LogMessage($"Switching to inventory slot {switchToIndex}, current item is two handed: {currentHeld?.itemProperties.twoHanded}");
                 bool currentIsTwoHanded = currentHeld != null && currentHeld.itemProperties.twoHanded;
                 localPlayer.StartCoroutine(
