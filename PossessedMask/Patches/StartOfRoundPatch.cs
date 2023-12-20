@@ -80,7 +80,16 @@ namespace PossessedMask.Patches
             timeUntilPossession = Plugin.timeToStartPossession.Value;
             timeHeldByPlayer = 0f;
             nextTimeToSwitchSlot = 0f;
-            Plugin.Log.LogInfo("timeHeldByPlayer cleared and timers reset");
+            
+            minTimeToSwitchSlots = Plugin.minTimeToSwitchSlots.Value;
+            maxTimeToSwitchSlots = Plugin.maxTimeToSwitchSlots.Value;
+            
+            minTimeToPossess = Plugin.minTimeToPossess.Value;
+            maxTimeToPossess = Plugin.maxTimeToPossess.Value;
+            
+            minTimeToPossessPlayer = Plugin.minTimeToPossessPlayer.Value;
+            maxTimeToPossessPlayer = Plugin.maxTimeToPossessPlayer.Value;
+            Plugin.Log.LogInfo("Reset timers and reloaded config values");
         }
         
         [HarmonyPatch("Update")]
