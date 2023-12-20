@@ -19,11 +19,16 @@ namespace PossessedMask
 
         // config
         
+        internal static ConfigEntry<int> numberOfSlotsFilledToEnableDroppingMask; // number of slots filled to enable dropping mask (-1 to disable) 
+        
         internal static ConfigEntry<float> timeToStartSwitchingSlots; // after this much time with mask in inventory start switching slots
         
         internal static ConfigEntry<float> timeToStartPossession; // after this much time with mask in inventory start possessions
 
         internal static ConfigEntry<bool> twoHandedItemBehaviour; // if true, 2 handed items will be dropped when switching slots
+        
+        internal static ConfigEntry<int> minMaskItemBaseValue; // minimum base value of mask item (affected by multipliers >1)
+        internal static ConfigEntry<int> maxMaskItemBaseValue; // maximum base value of mask item (affected by multipliers >1)
         
         internal static ConfigEntry<float> minTimeToSwitchSlots; // minimum time between switching slots
         internal static ConfigEntry<float> maxTimeToSwitchSlots; // maximum time between switching slots
@@ -50,11 +55,16 @@ namespace PossessedMask
 
             // config
             
+            numberOfSlotsFilledToEnableDroppingMask = Config.Bind("General", "NumberOfSlotsFilledToEnableDroppingMask", 3, "Number of inventory slots that need to be filled to enable dropping a mask");
+            
             timeToStartSwitchingSlots = Config.Bind("General", "TimeToStartSwitchingSlots", 5f, "After this much time with mask in inventory start switching slots");
             
             timeToStartPossession = Config.Bind("General", "TimeToStartPossession", 10f, "After this much time with mask in inventory start possessions");
             
             twoHandedItemBehaviour = Config.Bind("General", "TwoHandedItemBehaviour", true, "If true, 2 handed items will be dropped when switching slots");
+            
+            minMaskItemBaseValue = Config.Bind("Mask Item Base Value", "MinMaskItemBaseValue", 80, "Minimum base value of mask item (affected by multipliers >1)");
+            maxMaskItemBaseValue = Config.Bind("Mask Item Base Value", "MaxMaskItemBaseValue", 150, "Maximum base value of mask item (affected by multipliers >1)");
             
             minTimeToSwitchSlots = Config.Bind("Time To Switch Slots", "MinTimeToSwitchSlots", 12f, "Minimum time between switching slots");
             maxTimeToSwitchSlots = Config.Bind("Time To Switch Slots", "MaxTimeToSwitchSlots", 20f, "Maximum time between switching slots");
@@ -70,6 +80,8 @@ namespace PossessedMask
             maxTimeToPossessPlayer = Config.Bind("Item Activation Time", "MaxTimeToPossessPlayer", 4f, "Maximum time of actual possession");
             deltaTimeToPossessPlayer = Config.Bind("Item Activation Time", "DeltaTimeToPossessPlayer", 1f, "Time to add to min and max each time a possession happens");
             maxPossessingPlayerTime = Config.Bind("Item Activation Time", "MaxPossessingPlayerTime", 9f, "The number at which adding to min and max stops");
+            
+            
             
             harmony.PatchAll();
 
