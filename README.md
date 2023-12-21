@@ -5,6 +5,10 @@ Tweaks spawn chances of masks to allow them to spawn on all moons.
 
 # Releases
 
+# Version 1.0.6
+
+- Fixed network related issues, animations not working correctly and clients not transforming into masked.
+
 # Version 1.0.5
 
 - Each day reset scaling variables back to config values.
