@@ -157,7 +157,8 @@ namespace PossessedMask.Patches
                 int numOfSlots = localPlayer.ItemSlots.Length;
                 GrabbableObject[] inventory = localPlayer.ItemSlots;
                 int currIndex = localPlayer.currentItemSlot;
-                int switchToIndex = -1;
+                bool found = false;
+                bool forward = false;
                 for (int i = 1; i <= numOfSlots / 2; i++)
                 {
                     int checkIndex = ((currIndex + i) % numOfSlots + numOfSlots) % numOfSlots;
@@ -166,7 +167,8 @@ namespace PossessedMask.Patches
                     if (item != null && item.GetType() == typeof(HauntedMaskItem))
                     {
                         Plugin.Log.LogMessage("Success! (+1)");
-                        switchToIndex = ((currIndex + 1) % numOfSlots + numOfSlots) % numOfSlots;
+                        found = true;
+                        forward = true;
                         break;
                     }
                     
@@ -176,19 +178,25 @@ namespace PossessedMask.Patches
                     if (item != null && item.GetType() == typeof(HauntedMaskItem))
                     {
                         Plugin.Log.LogMessage("Success! (-1)");
-                        switchToIndex = ((currIndex - 1) % numOfSlots + numOfSlots) % numOfSlots;
+                        found = true;
+                        forward = false;
                         break;
                     }
                 }
 
+                if (!found)
+                {
+                    Plugin.Log.LogWarning($"No masks were found even though player has held a mask");
+                    return;
+                }
+                
                 if (currentHeld != null && !currentHeld.deactivated)
                     currentHeld.ItemActivate(false, false);                    
                 
-                Plugin.Log.LogMessage($"Switching to inventory slot {switchToIndex}, current item is two handed: {currentHeld?.itemProperties.twoHanded}");
                 bool currentIsTwoHanded = currentHeld != null && currentHeld.itemProperties.twoHanded;
                 localPlayer.StartCoroutine(
                     SwitchSlot(
-                        switchToIndex, 
+                        forward, 
                         currentIsTwoHanded
                         )
                     );
@@ -202,14 +210,17 @@ namespace PossessedMask.Patches
 
         private static IEnumerator PossessPlayer(HauntedMaskItem item, float time)
         {
-            item.ItemActivate(true);
+            IngamePlayerSettings.Instance.playerInput.actions.FindAction("ActivateItem").Disable();
+            ShipBuildModeManager.Instance.CancelBuildMode();
+            localPlayer.currentlyHeldObjectServer.gameObject.GetComponent<GrabbableObject>().UseItemOnClient();
             item.GetComponent<AudioSource>().PlayOneShot(possessionSounds[Random.Range(0, possessionSounds.Length)], localPlayer.itemAudio.volume * 0.75f);
             yield return new WaitForSeconds(time);
-            item.ItemActivate(false, false);
-            item.CancelAttachToPlayerOnLocalClient();
+            ShipBuildModeManager.Instance.CancelBuildMode();
+            localPlayer.currentlyHeldObjectServer.gameObject.GetComponent<GrabbableObject>().UseItemOnClient(buttonDown: false);
+            IngamePlayerSettings.Instance.playerInput.actions.FindAction("ActivateItem").Enable();
         }
 
-        private static IEnumerator SwitchSlot(int slot, bool currentIsTwoHanded)
+        private static IEnumerator SwitchSlot(bool forward, bool currentIsTwoHanded)
         {
             if (Plugin.twoHandedItemBehaviour.Value)
             {
@@ -217,7 +228,8 @@ namespace PossessedMask.Patches
                     yield return localPlayer.StartCoroutine(localPlayer.waitToEndOfFrameToDiscard());
                 if (Random.Range(0f, 1f) < 0.25f)
                     localPlayer.itemAudio.PlayOneShot(slotSwitchSounds[Random.Range(0, slotSwitchSounds.Length)], localPlayer.itemAudio.volume * 0.25f);
-                localPlayer.SwitchToItemSlot(slot);
+                localPlayer.SwitchToItemSlot(localPlayer.NextItemSlot(forward));
+                localPlayer.SwitchItemSlotsServerRpc(forward);
             }
         }
     }
