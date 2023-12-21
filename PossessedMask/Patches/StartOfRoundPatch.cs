@@ -99,7 +99,8 @@ namespace PossessedMask.Patches
             // If player isn't initialized or dead cancel
             if (localPlayer == null || 
                 localPlayer.isPlayerDead || 
-                StartOfRound.Instance.inShipPhase)
+                StartOfRound.Instance.inShipPhase ||
+                StartOfRound.Instance.currentLevelID == 3)
             {
                 return;
             }
@@ -207,9 +208,12 @@ namespace PossessedMask.Patches
                 Plugin.Log.LogInfo("Next switch in " + nextTimeToSwitchSlot + " seconds");
             }
         }
-
+        
         private static IEnumerator PossessPlayer(HauntedMaskItem item, float time)
         {
+            IngamePlayerSettings.Instance.playerInput.actions.FindAction("Discard").Disable();
+            IngamePlayerSettings.Instance.playerInput.actions.FindAction("SwitchItem").Disable();
+            IngamePlayerSettings.Instance.playerInput.actions.FindAction("Interact").Disable();
             IngamePlayerSettings.Instance.playerInput.actions.FindAction("ActivateItem").Disable();
             ShipBuildModeManager.Instance.CancelBuildMode();
             localPlayer.currentlyHeldObjectServer.gameObject.GetComponent<GrabbableObject>().UseItemOnClient();
@@ -218,6 +222,9 @@ namespace PossessedMask.Patches
             ShipBuildModeManager.Instance.CancelBuildMode();
             localPlayer.currentlyHeldObjectServer.gameObject.GetComponent<GrabbableObject>().UseItemOnClient(buttonDown: false);
             IngamePlayerSettings.Instance.playerInput.actions.FindAction("ActivateItem").Enable();
+            IngamePlayerSettings.Instance.playerInput.actions.FindAction("Interact").Enable();
+            IngamePlayerSettings.Instance.playerInput.actions.FindAction("SwitchItem").Enable();
+            IngamePlayerSettings.Instance.playerInput.actions.FindAction("Discard").Enable();
         }
 
         private static IEnumerator SwitchSlot(bool forward, bool currentIsTwoHanded)
