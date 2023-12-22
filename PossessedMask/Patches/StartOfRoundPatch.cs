@@ -229,10 +229,22 @@ namespace PossessedMask.Patches
 
         private static IEnumerator SwitchSlot(bool forward, bool currentIsTwoHanded)
         {
-            if (Plugin.twoHandedItemBehaviour.Value)
+            if (currentIsTwoHanded)
             {
-                if (currentIsTwoHanded)
+                if (Plugin.twoHandedItemBehaviour.Value)
+                {
+                    GrabbableObject current = localPlayer.currentlyHeldObject;
                     yield return localPlayer.StartCoroutine(localPlayer.waitToEndOfFrameToDiscard());
+                    current.EnableItemMeshes(true);
+                    yield return new WaitForEndOfFrame();
+                    if (Random.Range(0f, 1f) < 0.25f)
+                        localPlayer.itemAudio.PlayOneShot(slotSwitchSounds[Random.Range(0, slotSwitchSounds.Length)], localPlayer.itemAudio.volume * 0.25f);
+                    localPlayer.SwitchToItemSlot(localPlayer.NextItemSlot(forward));
+                    localPlayer.SwitchItemSlotsServerRpc(forward);
+                }
+            }
+            else
+            {
                 if (Random.Range(0f, 1f) < 0.25f)
                     localPlayer.itemAudio.PlayOneShot(slotSwitchSounds[Random.Range(0, slotSwitchSounds.Length)], localPlayer.itemAudio.volume * 0.25f);
                 localPlayer.SwitchToItemSlot(localPlayer.NextItemSlot(forward));
