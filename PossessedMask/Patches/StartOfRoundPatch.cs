@@ -216,11 +216,11 @@ namespace PossessedMask.Patches
             IngamePlayerSettings.Instance.playerInput.actions.FindAction("Interact").Disable();
             IngamePlayerSettings.Instance.playerInput.actions.FindAction("ActivateItem").Disable();
             ShipBuildModeManager.Instance.CancelBuildMode();
-            localPlayer.currentlyHeldObjectServer.gameObject.GetComponent<GrabbableObject>().UseItemOnClient();
+            item.UseItemOnClient();
             item.GetComponent<AudioSource>().PlayOneShot(possessionSounds[Random.Range(0, possessionSounds.Length)], localPlayer.itemAudio.volume * 0.75f);
             yield return new WaitForSeconds(time);
             ShipBuildModeManager.Instance.CancelBuildMode();
-            localPlayer.currentlyHeldObjectServer.gameObject.GetComponent<GrabbableObject>().UseItemOnClient(buttonDown: false);
+            item.UseItemOnClient(buttonDown: false);
             IngamePlayerSettings.Instance.playerInput.actions.FindAction("ActivateItem").Enable();
             IngamePlayerSettings.Instance.playerInput.actions.FindAction("Interact").Enable();
             IngamePlayerSettings.Instance.playerInput.actions.FindAction("SwitchItem").Enable();

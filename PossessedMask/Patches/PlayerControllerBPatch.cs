@@ -31,5 +31,18 @@ namespace PossessedMask.Patches
             }
             return true;
         }
+        
+        [HarmonyPatch("KillPlayer")]
+        [HarmonyPostfix]
+        private static void PatchKillPlayer(PlayerControllerB __instance)
+        {
+            if (__instance.isPlayerDead)
+            {
+                IngamePlayerSettings.Instance.playerInput.actions.FindAction("ActivateItem").Enable();
+                IngamePlayerSettings.Instance.playerInput.actions.FindAction("Interact").Enable();
+                IngamePlayerSettings.Instance.playerInput.actions.FindAction("SwitchItem").Enable();
+                IngamePlayerSettings.Instance.playerInput.actions.FindAction("Discard").Enable();
+            }
+        }   
     }
 }
