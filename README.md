@@ -5,6 +5,10 @@ Tweaks spawn chances of masks to allow them to spawn on all moons.
 
 # Releases
 
+# Version 1.0.9
+
+- Fixed bug that caused players to not be able to interact with objects after dying from the mask.
+
 # Version 1.0.8
 
 - Fixed bug that caused dropped 2 handed items to disappear on local client unless he is the host. (Thanks Steven4547466)
