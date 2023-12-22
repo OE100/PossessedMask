@@ -5,6 +5,10 @@ Tweaks spawn chances of masks to allow them to spawn on all moons.
 
 # Releases
 
+# Version 1.0.8
+
+- Fixed bug that caused dropped 2 handed items to disappear on local client unless he is the host. (Thanks Steven4547466)
+
 # Version 1.0.7
 
 - Stopped mask stuff while at the company building.
