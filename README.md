@@ -5,6 +5,12 @@ Tweaks spawn chances of masks to allow them to spawn on all moons.
 
 # Releases
 
+# Version 1.0.7
+
+- Stopped mask stuff while at the company building.
+- Prevents some more player actions during possession to lower the chance of animation breaking.
+- Modified the function for switching inventory slot for better compatibility with other mods.
+
 # Version 1.0.6
 
 - Fixed network related issues, animations not working correctly and clients not transforming into masked.
