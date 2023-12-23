@@ -20,9 +20,9 @@ namespace PossessedMask.Patches
             return true;
         }
         
-        [HarmonyPatch("SwitchToItemSlot")]
+        [HarmonyPatch("ScrollMouse_performed")]
         [HarmonyPrefix]
-        private static bool PatchSwitchToItemSlot(PlayerControllerB __instance, int slot, GrabbableObject fillSlotWithItem = null)
+        private static bool PatchScrollMouse_performed(PlayerControllerB __instance, InputAction.CallbackContext context)
         {
             GrabbableObject current = __instance.ItemSlots[__instance.currentItemSlot];
             if (current != null && current.GetType() == typeof(HauntedMaskItem) && __instance.activatingItem)
