@@ -5,6 +5,11 @@ Tweaks spawn chances of masks to allow them to spawn on all moons.
 
 # Releases
 
+# Version 1.0.10
+
+- Added delay between preventing client actions and automated actions to prevent errors in edge cases.
+- Changed some patches to hopefully prevent client-host desyncs.
+
 # Version 1.0.9
 
 - Fixed bug that caused players to not be able to interact with objects after dying from the mask.
