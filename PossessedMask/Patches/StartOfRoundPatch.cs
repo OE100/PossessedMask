@@ -221,7 +221,10 @@ namespace PossessedMask.Patches
             item.GetComponent<AudioSource>().PlayOneShot(possessionSounds[Random.Range(0, possessionSounds.Length)], localPlayer.itemAudio.volume * 0.75f);
             yield return new WaitForSeconds(time);
             ShipBuildModeManager.Instance.CancelBuildMode();
-            item.UseItemOnClient(buttonDown: false);
+            if (item.playerHeldBy != null)
+            {
+                item.UseItemOnClient(buttonDown: false);
+            }
             yield return new WaitForEndOfFrame();
             IngamePlayerSettings.Instance.playerInput.actions.FindAction("ActivateItem").Enable();
             IngamePlayerSettings.Instance.playerInput.actions.FindAction("Interact").Enable();
