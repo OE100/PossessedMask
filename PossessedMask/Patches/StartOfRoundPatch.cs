@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using GameNetcodeStuff;
 using HarmonyLib;
@@ -33,11 +34,12 @@ namespace PossessedMask.Patches
         private static float maxTimeToPossessPlayer;
         private static float deltaTimeToPossessPlayer;
         private static float maxPossessingPlayerTime;
-        
+
+        private static Terminal terminal = null;
         
         [HarmonyPatch("Start")]
         [HarmonyPostfix]
-        private static void PatchLoadResources()
+        private static void PatchLoadResources(StartOfRound __instance)
         {
             AssetBundle ab = AssetBundle.LoadFromStream(Assembly.GetExecutingAssembly()
                 .GetManifestResourceStream(Assembly.GetExecutingAssembly().GetManifestResourceNames()[0]));
@@ -53,6 +55,9 @@ namespace PossessedMask.Patches
             slotSwitchSounds[0] = ab.LoadAsset<AudioClip>("slot1");
             slotSwitchSounds[1] = ab.LoadAsset<AudioClip>("slot2");
             
+            // patch spawnable items to include masks on all levels
+            __instance.StartCoroutine(RegisterMasks(__instance));
+
             // config loading
             minTimeToSwitchSlots = Plugin.minTimeToSwitchSlots.Value;
             maxTimeToSwitchSlots = Plugin.maxTimeToSwitchSlots.Value;
@@ -68,6 +73,99 @@ namespace PossessedMask.Patches
             maxTimeToPossessPlayer = Plugin.maxTimeToPossessPlayer.Value;
             deltaTimeToPossessPlayer = Plugin.deltaTimeToPossessPlayer.Value;
             maxPossessingPlayerTime = Plugin.maxPossessingPlayerTime.Value;
+        }
+
+        private static IEnumerator RegisterMasks(StartOfRound __instance)
+        {
+            if (Plugin.enableChangeMaskSpawnChance.Value == 0)
+            {
+                yield break;
+            }
+            // find indexes of comedy and tragedy in all items list
+            List<Item> itemsList = __instance.allItemsList.itemsList;
+            int comedyIndex = itemsList.FindIndex(item => item.name == "Comedy");
+            int tragedyIndex = itemsList.FindIndex(item => item.name == "Tragedy");
+            
+            
+            if (comedyIndex == -1)
+            {
+                Plugin.Log.LogError("Comedy not found in allItemsList, skipping patching Comedy");
+            }
+
+            if (tragedyIndex == -1)
+            {
+                Plugin.Log.LogError("Tragedy not found in allItemsList, skipping patching Tragedy");
+            }
+            
+            // find the terminal object
+            while (terminal == null)
+            {
+                terminal = Object.FindObjectOfType<Terminal>();
+                yield return new WaitForSeconds(1);
+            }
+            
+            // change all items list comedy and tragedy scrap value according to config
+            Item comedyItem = null;
+            if (comedyIndex != -1)
+            {
+                comedyItem = itemsList[comedyIndex];
+                comedyItem.minValue = Plugin.minMaskItemBaseValue.Value;
+                comedyItem.maxValue = Plugin.maxMaskItemBaseValue.Value;
+            }
+            Item tragedyItem = null;
+            if (tragedyIndex != -1)
+            {
+                tragedyItem = itemsList[tragedyIndex];
+                tragedyItem.minValue = Plugin.minMaskItemBaseValue.Value;
+                tragedyItem.maxValue = Plugin.maxMaskItemBaseValue.Value;
+            }
+
+            SelectableLevel[] moonsCatalogueList = terminal.moonsCatalogueList;
+            float multiplier = Plugin.maskRarityScalingMultiplier.Value;
+            foreach (SelectableLevel level in moonsCatalogueList)
+            {
+                int rarity = Mathf.Clamp(Mathf.RoundToInt(Plugin.maskRarity.Value *
+                                                          (1 + (Plugin.maskRarityScaling.Value ? multiplier : 0))), 0, 100);
+                
+                if (comedyIndex != -1)
+                {
+                    SpawnableItemWithRarity comedyWithRarity = new SpawnableItemWithRarity();
+                    comedyWithRarity.spawnableItem = comedyItem;
+                    comedyWithRarity.rarity = rarity;
+                    
+                    int levelIndex = level.spawnableScrap.FindIndex(item => item.spawnableItem.name == "Comedy");
+                    if (levelIndex == -1 && Plugin.enableChangeMaskSpawnChance.Value == 2)
+                    {
+                        level.spawnableScrap.Add(comedyWithRarity);
+                    }
+                    else
+                    {
+                        level.spawnableScrap[levelIndex] = comedyWithRarity;
+                    }
+                }
+
+                if (tragedyIndex != -1)
+                {
+                    SpawnableItemWithRarity tragedyWithRarity = new SpawnableItemWithRarity();
+                    tragedyWithRarity.spawnableItem = tragedyItem;
+                    tragedyWithRarity.rarity = rarity;
+                    
+                    int levelIndex = level.spawnableScrap.FindIndex(item => item.spawnableItem.name == "Tragedy");
+                    if (levelIndex == -1 && Plugin.enableChangeMaskSpawnChance.Value == 2)
+                    {
+                        level.spawnableScrap.Add(tragedyWithRarity);
+                    }
+                    else
+                    {
+                        level.spawnableScrap[levelIndex] = tragedyWithRarity;
+                    }
+                }
+
+                if (Plugin.maskRarityScaling.Value)
+                {
+                    multiplier *= Plugin.maskRarityScalingMultiplier.Value;
+                }
+            }
         }
         
         [HarmonyPatch("openingDoorsSequence")]
@@ -130,7 +228,8 @@ namespace PossessedMask.Patches
             }
             // If a mask is the currently held item try to possess player
             var currentHeld = localPlayer.ItemSlots[localPlayer.currentItemSlot];
-            if (currentHeld != null && 
+            if (Plugin.enableMaskPossessionMechanic.Value &&
+                currentHeld != null && 
                 currentHeld.GetType() == typeof(HauntedMaskItem))
             {
                 if (timeUntilPossession < 0f)
@@ -150,7 +249,8 @@ namespace PossessedMask.Patches
                 }
             }
             // Else if the player holds a mask try to switch slots to the closest mask
-            else if (timeHeldByPlayer > Plugin.timeToStartSwitchingSlots.Value && 
+            else if (Plugin.enableMaskSwitchSlotMechanic.Value && 
+                     timeHeldByPlayer > Plugin.timeToStartSwitchingSlots.Value && 
                      nextTimeToSwitchSlot <= 0f)
             {
                 Plugin.Log.LogMessage("Player is not holding a mask, switching to closest held mask");

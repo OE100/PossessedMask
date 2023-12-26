@@ -1,75 +1,43 @@
-﻿using System;
-using System.Linq;
-using HarmonyLib;
+﻿using HarmonyLib;
 
 namespace PossessedMask.Patches
 {
     [HarmonyPatch(typeof(Terminal))]
     public class TerminalPatch
     {
-        internal static SpawnableItemWithRarity comedy = null;
-        internal static SpawnableItemWithRarity tragedy = null;
-        
-        [HarmonyPatch("Start")]
-        [HarmonyPostfix]
-        private static void PatchSelectableLevels(Terminal __instance)
+        [HarmonyPatch("Start"), HarmonyPostfix]
+        private static void PatchStart(Terminal __instance)
         {
-            SelectableLevel dine;
-            try
-            {
-                dine = __instance.moonsCatalogueList.First(level => level.PlanetName == "7 Dine");
-            } catch (InvalidOperationException)
-            {
-                Plugin.Log.LogWarning("7 Dine not found in selectable levels, skipping patching min and max values of Comedy and Tragedy");
-                return;
-            }
+            string name = "MaskedPlayerEnemy";
+            SpawnableEnemyWithRarity maskedEnemyZeroChance = new SpawnableEnemyWithRarity();
+            maskedEnemyZeroChance.rarity = 0;
             
-            try
+            foreach (SelectableLevel level in __instance.moonsCatalogueList)
             {
-                comedy = dine.spawnableScrap.First(rarity => rarity.spawnableItem.itemName == "Comedy");
-                comedy.spawnableItem.minValue = Plugin.minMaskItemBaseValue.Value;
-                comedy.spawnableItem.maxValue = Plugin.maxMaskItemBaseValue.Value;
-            } catch (InvalidOperationException)
-            {
-                Plugin.Log.LogWarning("Comedy not found in 7 Dine, skipping patching min and max values of Comedy");
-            }
-            
-            try
-            {
-                tragedy = dine.spawnableScrap.First(rarity => rarity.spawnableItem.itemName == "Tragedy");
-                tragedy.spawnableItem.minValue = Plugin.minMaskItemBaseValue.Value;
-                tragedy.spawnableItem.maxValue = Plugin.maxMaskItemBaseValue.Value;
-            }
-            catch (InvalidOperationException)
-            {
-                Plugin.Log.LogWarning("Tragedy not found in 7 Dine, skipping patching min and max values of Tragedy");
+                foreach (SpawnableEnemyWithRarity enemyWithRarity in level.Enemies)
+                {
+                    if (enemyWithRarity.enemyType.name == name)
+                    {
+                        maskedEnemyZeroChance.enemyType = enemyWithRarity.enemyType;
+                        break;
+                    }
+                }
+
+                if (maskedEnemyZeroChance.enemyType != null)
+                    break;
             }
 
-            if (tragedy == null && comedy == null)
+            if (maskedEnemyZeroChance.enemyType == null)
             {
-                Plugin.Log.LogWarning("Both masks not found on diner, skipping patching min and max values of Comedy and Tragedy");
+                Plugin.Log.LogError("Masked enemy isn't allowed to spawn on any level!");
                 return;
             }
             
             foreach (SelectableLevel level in __instance.moonsCatalogueList)
             {
-                int comedyInd = level.spawnableScrap.FindIndex(rarity => rarity.spawnableItem.itemName == "Comedy");
-                int tragedyInd = level.spawnableScrap.FindIndex(rarity => rarity.spawnableItem.itemName == "Tragedy");
-
-                if (tragedy != null)
+                if (!level.Enemies.Exists(enemy => enemy.enemyType.name == name))
                 {
-                    if (tragedyInd == -1)
-                        level.spawnableScrap.Add(tragedy);
-                    else
-                        level.spawnableScrap[tragedyInd] = tragedy;
-                }
-
-                if (comedy != null)
-                {
-                    if (comedyInd == -1)
-                        level.spawnableScrap.Add(comedy);
-                    else
-                        level.spawnableScrap[comedyInd] = comedy;
+                    level.Enemies.Add(maskedEnemyZeroChance);
                 }
             }
         }

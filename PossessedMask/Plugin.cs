@@ -19,6 +19,10 @@ namespace PossessedMask
 
         // config
         
+        internal static ConfigEntry<bool> enableMaskPossessionMechanic; // if true, mask possession mechanic will be enabled
+        internal static ConfigEntry<bool> enableMaskSwitchSlotMechanic; // if true, mask switching to your active slot mechanic will be enabled
+        internal static ConfigEntry<int> enableChangeMaskSpawnChance; // if 0, will not override mask spawn chance, scrap value and available levels. if 1, will override spawn chance, scrap value but not available levels, if 2 will override all of them. 
+        
         internal static ConfigEntry<int> numberOfSlotsFilledToEnableDroppingMask; // number of slots filled to enable dropping mask (-1 to disable) 
         
         internal static ConfigEntry<float> timeToStartSwitchingSlots; // after this much time with mask in inventory start switching slots
@@ -26,6 +30,10 @@ namespace PossessedMask
         internal static ConfigEntry<float> timeToStartPossession; // after this much time with mask in inventory start possessions
 
         internal static ConfigEntry<bool> twoHandedItemBehaviour; // if true, 2 handed items will be dropped when switching slots
+        
+        internal static ConfigEntry<int> maskRarity; // rarity of mask item (0 - 100, 0 - doesn't spawn, 100 - spawns a lot)
+        internal static ConfigEntry<bool> maskRarityScaling; // if true, mask rarity will be scaled up by moon rank
+        internal static ConfigEntry<float> maskRarityScalingMultiplier; // multiplier for mask rarity scaling
         
         internal static ConfigEntry<int> minMaskItemBaseValue; // minimum base value of mask item (affected by multipliers >1)
         internal static ConfigEntry<int> maxMaskItemBaseValue; // maximum base value of mask item (affected by multipliers >1)
@@ -55,6 +63,10 @@ namespace PossessedMask
 
             // config
             
+            enableMaskPossessionMechanic = Config.Bind("Mechanics", "EnableMaskPossessionMechanic", true, "If true, mask possession mechanic will be enabled");
+            enableMaskSwitchSlotMechanic = Config.Bind("Mechanics", "EnableMaskSwitchSlotMechanic", true, "If true, mask switching to your active slot mechanic will be enabled");
+            enableChangeMaskSpawnChance = Config.Bind("Mechanics", "EnableChangeMaskSpawnChance", 2, "If 0, will not override mask spawn chance, scrap value and available levels.\nIf 1, will override spawn chance, scrap value but not available levels.\nif 2 will override all of them.");
+            
             numberOfSlotsFilledToEnableDroppingMask = Config.Bind("General", "NumberOfSlotsFilledToEnableDroppingMask", 3, "Number of inventory slots that need to be filled to enable dropping a mask");
             
             timeToStartSwitchingSlots = Config.Bind("General", "TimeToStartSwitchingSlots", 5f, "After this much time with mask in inventory start switching slots");
@@ -63,7 +75,11 @@ namespace PossessedMask
             
             twoHandedItemBehaviour = Config.Bind("General", "TwoHandedItemBehaviour", true, "If true, 2 handed items will be dropped when switching slots");
             
-            minMaskItemBaseValue = Config.Bind("Mask Item Base Value", "MinMaskItemBaseValue", 80, "Minimum base value of mask item (affected by multipliers >1)");
+            maskRarity = Config.Bind("Mask Rarity", "MaskRarity", 35, "Rarity of mask item 0 - 100 (0 - doesn't spawn, 100 - spawns a lot)");
+            maskRarityScaling = Config.Bind("Mask Rarity", "MaskRarityScaling", true, "If true, mask rarity will be scaled up by moon rank");
+            maskRarityScalingMultiplier = Config.Bind("Mask Rarity", "MaskRarityScalingMultiplier", 0.5f, "Multiplier for mask rarity scaling");
+            
+            minMaskItemBaseValue = Config.Bind("Mask Item Base Value", "MinMaskItemBaseValue", 100, "Minimum base value of mask item (affected by multipliers >1)");
             maxMaskItemBaseValue = Config.Bind("Mask Item Base Value", "MaxMaskItemBaseValue", 150, "Maximum base value of mask item (affected by multipliers >1)");
             
             minTimeToSwitchSlots = Config.Bind("Time To Switch Slots", "MinTimeToSwitchSlots", 12f, "Minimum time between switching slots");

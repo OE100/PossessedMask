@@ -8,7 +8,7 @@
         <ProjectGuid>{4F62CD59-C324-4153-BDDC-B58865CC6A5A}</ProjectGuid>
         <OutputType>Library</OutputType>
         <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>PossesedMask</RootNamespace>
+        <RootNamespace>PossessedMask</RootNamespace>
         <AssemblyName>PossessedMask</AssemblyName>
         <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
@@ -109,7 +109,6 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="Patches\PlayerControllerBPatch.cs" />
-        <Compile Include="Patches\RoundManagerPatch.cs" />
         <Compile Include="Patches\StartOfRoundPatch.cs" />
         <Compile Include="Patches\TerminalPatch.cs" />
         <Compile Include="Plugin.cs" />
