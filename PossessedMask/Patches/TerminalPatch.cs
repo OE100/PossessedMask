@@ -33,12 +33,16 @@ namespace PossessedMask.Patches
                 return;
             }
             
+            Plugin.Log.LogMessage($"Masked enemy found: {maskedEnemyZeroChance.enemyType.name}, fixing AI on all levels...");
             foreach (SelectableLevel level in __instance.moonsCatalogueList)
             {
                 if (!level.Enemies.Exists(enemy => enemy.enemyType.name == name))
                 {
+                    Plugin.Log.LogMessage($"Masked enemy not found on {level.PlanetName}, adding zero...");
                     level.Enemies.Add(maskedEnemyZeroChance);
                 }
+                else
+                    Plugin.Log.LogMessage($"Masked enemy found on {level.PlanetName}.");
             }
         }
     }

@@ -1,9 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using GameNetcodeStuff;
 using HarmonyLib;
 using UnityEngine;
+using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
 namespace PossessedMask.Patches
@@ -56,7 +59,7 @@ namespace PossessedMask.Patches
             slotSwitchSounds[1] = ab.LoadAsset<AudioClip>("slot2");
             
             // patch spawnable items to include masks on all levels
-            __instance.StartCoroutine(RegisterMasks(__instance));
+            __instance.StartCoroutine(RegisterMasks());
 
             // config loading
             minTimeToSwitchSlots = Plugin.minTimeToSwitchSlots.Value;
@@ -75,47 +78,43 @@ namespace PossessedMask.Patches
             maxPossessingPlayerTime = Plugin.maxPossessingPlayerTime.Value;
         }
 
-        private static IEnumerator RegisterMasks(StartOfRound __instance)
+        private static IEnumerator RegisterMasks()
         {
             if (Plugin.enableChangeMaskSpawnChance.Value == 0)
             {
                 yield break;
             }
-            // find indexes of comedy and tragedy in all items list
-            List<Item> itemsList = __instance.allItemsList.itemsList;
-            int comedyIndex = itemsList.FindIndex(item => item.name == "Comedy");
-            int tragedyIndex = itemsList.FindIndex(item => item.name == "Tragedy");
             
-            
-            if (comedyIndex == -1)
-            {
-                Plugin.Log.LogError("Comedy not found in allItemsList, skipping patching Comedy");
-            }
-
-            if (tragedyIndex == -1)
-            {
-                Plugin.Log.LogError("Tragedy not found in allItemsList, skipping patching Tragedy");
-            }
             
             // find the terminal object
-            while (terminal == null)
+            while (!terminal)
             {
                 terminal = Object.FindObjectOfType<Terminal>();
                 yield return new WaitForSeconds(1);
             }
             
             // change all items list comedy and tragedy scrap value according to config
-            Item comedyItem = null;
-            if (comedyIndex != -1)
+            Item comedyItem = StartOfRound.Instance.allItemsList.itemsList.FirstOrDefault(item => item.itemName == "Comedy");
+            
+            if (!comedyItem)
             {
-                comedyItem = itemsList[comedyIndex];
+                Plugin.Log.LogError("Comedy not found in allItemsList, skipping patching Comedy");
+            }
+            else
+            {
                 comedyItem.minValue = Plugin.minMaskItemBaseValue.Value;
                 comedyItem.maxValue = Plugin.maxMaskItemBaseValue.Value;
             }
-            Item tragedyItem = null;
-            if (tragedyIndex != -1)
+            
+            
+            Item tragedyItem = StartOfRound.Instance.allItemsList.itemsList.FirstOrDefault(item => item.itemName == "Tragedy");
+            
+            if (!tragedyItem)
             {
-                tragedyItem = itemsList[tragedyIndex];
+                Plugin.Log.LogError("Tragedy not found in allItemsList, skipping patching Tragedy");
+            }
+            else
+            {
                 tragedyItem.minValue = Plugin.minMaskItemBaseValue.Value;
                 tragedyItem.maxValue = Plugin.maxMaskItemBaseValue.Value;
             }
@@ -127,13 +126,13 @@ namespace PossessedMask.Patches
                 int rarity = Mathf.Clamp(Mathf.RoundToInt(Plugin.maskRarity.Value *
                                                           (1 + (Plugin.maskRarityScaling.Value ? multiplier : 0))), 0, 100);
                 
-                if (comedyIndex != -1)
+                if (comedyItem)
                 {
                     SpawnableItemWithRarity comedyWithRarity = new SpawnableItemWithRarity();
                     comedyWithRarity.spawnableItem = comedyItem;
                     comedyWithRarity.rarity = rarity;
                     
-                    int levelIndex = level.spawnableScrap.FindIndex(item => item.spawnableItem.name == "Comedy");
+                    int levelIndex = level.spawnableScrap.FindIndex(item => item.spawnableItem.itemName == "Comedy");
                     if (levelIndex == -1 && Plugin.enableChangeMaskSpawnChance.Value == 2)
                     {
                         level.spawnableScrap.Add(comedyWithRarity);
@@ -144,13 +143,13 @@ namespace PossessedMask.Patches
                     }
                 }
 
-                if (tragedyIndex != -1)
+                if (tragedyItem)
                 {
                     SpawnableItemWithRarity tragedyWithRarity = new SpawnableItemWithRarity();
                     tragedyWithRarity.spawnableItem = tragedyItem;
                     tragedyWithRarity.rarity = rarity;
                     
-                    int levelIndex = level.spawnableScrap.FindIndex(item => item.spawnableItem.name == "Tragedy");
+                    int levelIndex = level.spawnableScrap.FindIndex(item => item.spawnableItem.itemName == "Tragedy");
                     if (levelIndex == -1 && Plugin.enableChangeMaskSpawnChance.Value == 2)
                     {
                         level.spawnableScrap.Add(tragedyWithRarity);
