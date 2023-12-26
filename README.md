@@ -5,6 +5,11 @@ Tweaks spawn chances of masks to allow them to spawn on all moons.
 
 # Releases
 
+# Version 1.1.0
+
+- Hopefully fixed a bug where if a masked enemy spawned on a planet that is disallowed in vanilla it would just get stuck.
+- Added more config options for controlling mod mechanics and spawn rate of masks.
+
 # Version 1.0.10
 
 - Added delay between preventing client actions and automated actions to prevent errors in edge cases.
