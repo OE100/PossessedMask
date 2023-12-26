@@ -5,6 +5,10 @@ Tweaks spawn chances of masks to allow them to spawn on all moons.
 
 # Releases
 
+# Version 1.1.1
+
+- Fixed item name bug causing the mask value and spawn chance not to be changed.
+
 # Version 1.1.0
 
 - Hopefully fixed a bug where if a masked enemy spawned on a planet that is disallowed in vanilla it would just get stuck.
