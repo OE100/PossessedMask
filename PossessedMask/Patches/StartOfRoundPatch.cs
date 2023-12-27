@@ -243,8 +243,8 @@ namespace PossessedMask.Patches
                     minTimeToPossess -= (minTimeToPossess > minPossessingTime ? deltaTimeToPossess : 0f);
                     maxTimeToPossess -= (maxTimeToPossess > minPossessingTime ? deltaTimeToPossess : 0f);
                     
-                    IEnumerator possessPlayerDelayed = PossessPlayer((HauntedMaskItem)currentHeld, time);
-                    localPlayer.StartCoroutine(possessPlayerDelayed);
+                    PossessPlayer(time);
+                    nextTimeToSwitchSlot = time + 1;
                 }
             }
             // Else if the player holds a mask try to switch slots to the closest mask
@@ -259,6 +259,7 @@ namespace PossessedMask.Patches
                 int currIndex = localPlayer.currentItemSlot;
                 bool found = false;
                 bool forward = false;
+                bool oneAway = false;
                 for (int i = 1; i <= numOfSlots / 2; i++)
                 {
                     int checkIndex = ((currIndex + i) % numOfSlots + numOfSlots) % numOfSlots;
@@ -269,6 +270,8 @@ namespace PossessedMask.Patches
                         Plugin.Log.LogMessage("Success! (+1)");
                         found = true;
                         forward = true;
+                        if (i == 1)
+                            oneAway = true;
                         break;
                     }
                     
@@ -280,6 +283,8 @@ namespace PossessedMask.Patches
                         Plugin.Log.LogMessage("Success! (-1)");
                         found = true;
                         forward = false;
+                        if (i == 1)
+                            oneAway = true;
                         break;
                     }
                 }
@@ -289,15 +294,24 @@ namespace PossessedMask.Patches
                     Plugin.Log.LogWarning($"No masks were found even though player has held a mask");
                     return;
                 }
-                
-                if (currentHeld != null && !currentHeld.deactivated)
-                    currentHeld.ItemActivate(false, false);                    
+
+                if (currentHeld != null && currentHeld.isBeingUsed)
+                {
+                    currentHeld.ItemActivate(false, false);
+                }
                 
                 bool currentIsTwoHanded = currentHeld != null && currentHeld.itemProperties.twoHanded;
+                if (oneAway)
+                    IngamePlayerSettings.Instance.playerInput.actions.FindAction("SwitchItem").Disable();
+                if (localPlayer.currentlyHeldObject != null && localPlayer.currentlyHeldObject.GetType() == typeof(HauntedMaskItem))
+                {
+                    return;
+                }
                 localPlayer.StartCoroutine(
                     SwitchSlot(
                         forward, 
-                        currentIsTwoHanded
+                        currentIsTwoHanded,
+                        oneAway
                         )
                     );
                 
@@ -308,21 +322,38 @@ namespace PossessedMask.Patches
             }
         }
         
-        private static IEnumerator PossessPlayer(HauntedMaskItem item, float time)
+        private static void PossessPlayer(float time)
         {
-            IngamePlayerSettings.Instance.playerInput.actions.FindAction("Discard").Disable();
             IngamePlayerSettings.Instance.playerInput.actions.FindAction("SwitchItem").Disable();
             IngamePlayerSettings.Instance.playerInput.actions.FindAction("Interact").Disable();
-            IngamePlayerSettings.Instance.playerInput.actions.FindAction("ActivateItem").Disable();
-            ShipBuildModeManager.Instance.CancelBuildMode();
-            yield return new WaitForEndOfFrame();
-            item.UseItemOnClient();
-            item.GetComponent<AudioSource>().PlayOneShot(possessionSounds[Random.Range(0, possessionSounds.Length)], localPlayer.itemAudio.volume * 0.75f);
+            IngamePlayerSettings.Instance.playerInput.actions.FindAction("Discard").Enable();
+            
+            if (localPlayer.currentlyHeldObjectServer != null && localPlayer.currentlyHeldObjectServer.GetType() == typeof(HauntedMaskItem))
+            {
+                IngamePlayerSettings.Instance.playerInput.actions.FindAction("SwitchItem").Disable();
+                IngamePlayerSettings.Instance.playerInput.actions.FindAction("ActivateItem").Disable();
+                ShipBuildModeManager.Instance.CancelBuildMode();
+                
+                localPlayer.currentlyHeldObjectServer.UseItemOnClient();
+                localPlayer.currentlyHeldObjectServer.GetComponent<AudioSource>().PlayOneShot(possessionSounds[Random.Range(0, possessionSounds.Length)], localPlayer.itemAudio.volume * 0.75f);
+                localPlayer.StartCoroutine(DePossessPlayer(time));
+            }
+            else
+            {
+                nextTimeToSwitchSlot = 0;
+                IngamePlayerSettings.Instance.playerInput.actions.FindAction("SwitchItem").Enable();
+                IngamePlayerSettings.Instance.playerInput.actions.FindAction("Interact").Enable();
+                IngamePlayerSettings.Instance.playerInput.actions.FindAction("Discard").Enable();
+            }
+        }
+        
+        private static IEnumerator DePossessPlayer(float time)
+        {
             yield return new WaitForSeconds(time);
             ShipBuildModeManager.Instance.CancelBuildMode();
-            if (item.playerHeldBy != null)
+            if (localPlayer.currentlyHeldObjectServer != null)
             {
-                item.UseItemOnClient(buttonDown: false);
+                localPlayer.currentlyHeldObjectServer.UseItemOnClient(buttonDown: false);
             }
             yield return new WaitForEndOfFrame();
             IngamePlayerSettings.Instance.playerInput.actions.FindAction("ActivateItem").Enable();
@@ -331,7 +362,7 @@ namespace PossessedMask.Patches
             IngamePlayerSettings.Instance.playerInput.actions.FindAction("Discard").Enable();
         }
 
-        private static IEnumerator SwitchSlot(bool forward, bool currentIsTwoHanded)
+        private static IEnumerator SwitchSlot(bool forward, bool currentIsTwoHanded, bool oneAway)
         {
             if (currentIsTwoHanded)
             {
@@ -354,6 +385,12 @@ namespace PossessedMask.Patches
                 yield return new WaitForEndOfFrame();
                 localPlayer.SwitchToItemSlot(localPlayer.NextItemSlot(forward));
                 localPlayer.SwitchItemSlotsServerRpc(forward);
+            }
+
+            if (oneAway)
+            {
+                yield return new WaitForSeconds(0.5f);
+                IngamePlayerSettings.Instance.playerInput.actions.FindAction("SwitchItem").Enable();
             }
         }
     }
