@@ -5,6 +5,11 @@ Tweaks spawn chances of masks to allow them to spawn on all moons.
 
 # Releases
 
+# Version 1.1.2
+
+- Fixed deactivation of selected item when switching slots.
+- Fixed bug causing stun grenades to activate when switching slots.
+
 # Version 1.1.1
 
 - Fixed item name bug causing the mask value and spawn chance not to be changed.
