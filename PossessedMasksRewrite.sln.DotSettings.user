@@ -1,0 +1,9 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=C_003A_005CProgram_0020Files_0020_0028x86_0029_005CSteam_005Csteamapps_005Ccommon_005CLethal_0020Company_005CBepInEx_005Cplugins_005CMMHOOK_005CMMHOOK_005FAssembly_002DCSharp_002Edll/@EntryIndexedValue">True</s:Boolean>
+	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;&#xD;
+  &lt;Assembly Path="C:\Users\omere\.nuget\packages\lethalcompany.gamelibs.steam\49.0.0-alpha.1\ref\netstandard2.0\Unity.Netcode.Runtime.dll" /&gt;&#xD;
+  &lt;PhysicalFolder Path="C:\Users\omere\.nuget\packages\unityengine.modules\2022.3.9" Loaded="True" /&gt;&#xD;
+  &lt;PhysicalFolder Path="C:\Users\omere\.nuget\packages\evaisa.lethallib\0.12.1" Loaded="True" /&gt;&#xD;
+  &lt;PhysicalFolder Path="C:\Users\omere\.nuget\packages\unityengine.modules\2023.3.0-beta.3" Loaded="True" /&gt;&#xD;
+  &lt;Assembly Path="C:\Users\omere\.nuget\packages\evaisa.lethallib\0.13.2\lib\netstandard2.1\LethalLib.dll" /&gt;&#xD;
+&lt;/AssemblyExplorer&gt;</s:String></wpf:ResourceDictionary>
