@@ -5,6 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>disable</Nullable>
         <LangVersion>latest</LangVersion>
+        <RootNamespace>PossessedMasksRewrite</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
