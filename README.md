@@ -5,6 +5,9 @@ Tweaks spawn chances of masks to allow them to spawn on all moons.
 
 # Releases
 
+# Version 2.0.0
+- Rewritten the mod from the ground up with networking to hopefully prevent most desyncs.
+
 # Version 1.1.2
 
 - Fixed deactivation of selected item when switching slots.
