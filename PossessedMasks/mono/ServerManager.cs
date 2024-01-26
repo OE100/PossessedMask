@@ -11,6 +11,7 @@ namespace PossessedMasksRewrite.mono;
 public class ServerManager : MonoBehaviour
 {
     private int _currIndex;
+    private bool _usingData = false;
     private readonly Dictionary<PlayerControllerB, PlayerProps> _playerProps = new();
     private readonly List<PlayerControllerB> _activePlayers = [];
 
@@ -75,9 +76,11 @@ public class ServerManager : MonoBehaviour
         }
 
         var player = _activePlayers[_currIndex];
-        if (Utils.IsActivePlayer(player))
+        if (!_usingData && Utils.IsActivePlayer(player))
         {
+            _usingData = true;
             DoInterval(player);
+            _usingData = false;
             _currIndex = (_currIndex + 1) % _activePlayers.Count;
         }
         else
@@ -134,13 +137,16 @@ public class ServerManager : MonoBehaviour
                 slot);
         }
     }
-    
-    private void NewLevel()
+
+    private IEnumerator NewLevel()
     {
+        yield return new WaitUntil(() => !_usingData);
+        _usingData = true;
         _activePlayers.Clear();
         _playerProps.Clear();
         _activePlayers.AddRange(StartOfRound.Instance.allPlayerScripts.Where(Utils.IsActivePlayer));
         _activePlayers.ForEach(player => _playerProps[player] = new PlayerProps());
+        _usingData = false;
     }
     
     private IEnumerator WaitUntilAllowed()
@@ -149,7 +155,7 @@ public class ServerManager : MonoBehaviour
         yield return new WaitUntil(() => Utils.InLevel);
         Plugin.Log.LogDebug("Allowed!");
         yield return new WaitForEndOfFrame();
-        NewLevel();
+        StartCoroutine(NewLevel());
         Plugin.Log.LogDebug("Waiting until not allowed");
         yield return new WaitUntil(() => !Utils.InLevel);
         Plugin.Log.LogDebug("Not allowed!");
