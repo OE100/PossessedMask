@@ -18,7 +18,7 @@
       </PackageReference>
       <PackageReference Include="BepInEx.Core" Version="5.4.21" />
       <PackageReference Include="Evaisa.LethalLib" Version="0.13.2" />
-      <PackageReference Include="Evaisa.NetcodePatcher.MSBuild" Version="3.1.1">
+      <PackageReference Include="Evaisa.NetcodePatcher.MSBuild" Version="3.3.4">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
