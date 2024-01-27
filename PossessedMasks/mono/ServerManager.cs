@@ -1,6 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using GameNetcodeStuff;
 using PossessedMasksRewrite.networking;
 using UnityEngine;
@@ -151,14 +149,10 @@ public class ServerManager : MonoBehaviour
     
     private IEnumerator WaitUntilAllowed()
     {
-        Plugin.Log.LogDebug("Waiting until allowed");
         yield return new WaitUntil(() => Utils.InLevel);
-        Plugin.Log.LogDebug("Allowed!");
         yield return new WaitForEndOfFrame();
         StartCoroutine(NewLevel());
-        Plugin.Log.LogDebug("Waiting until not allowed");
         yield return new WaitUntil(() => !Utils.InLevel);
-        Plugin.Log.LogDebug("Not allowed!");
         yield return new WaitForEndOfFrame();
         StartCoroutine(WaitUntilAllowed());
     }
