@@ -1,6 +1,6 @@
 ﻿using BepInEx.Configuration;
 
-namespace PossessedMasksRewrite;
+namespace PossessedMasks;
 
 public class ModConfig
 {

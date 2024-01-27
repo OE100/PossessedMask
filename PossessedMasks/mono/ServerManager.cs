@@ -1,10 +1,10 @@
 ﻿using System.Collections;
 using GameNetcodeStuff;
-using PossessedMasksRewrite.networking;
+using PossessedMasks.networking;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace PossessedMasksRewrite.mono;
+namespace PossessedMasks.mono;
 
 public class ServerManager : MonoBehaviour
 {

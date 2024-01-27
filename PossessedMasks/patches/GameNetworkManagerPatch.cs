@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using HarmonyLib;
-using PossessedMasksRewrite.networking;
+using PossessedMasks.networking;
 using Unity.Netcode;
 using UnityEngine;
 
-namespace PossessedMasksRewrite.patches;
+namespace PossessedMasks.patches;
 
 [HarmonyPatch(typeof(GameNetworkManager))]
 public class GameNetworkManagerPatch

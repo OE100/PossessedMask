@@ -4,7 +4,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
 
-namespace PossessedMasksRewrite;
+namespace PossessedMasks;
 
 [BepInPlugin(Guid, Name, Version)]
 public class Plugin : BaseUnityPlugin

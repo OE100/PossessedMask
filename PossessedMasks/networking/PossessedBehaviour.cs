@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Random = UnityEngine.Random;
 
-namespace PossessedMasksRewrite.networking;
+namespace PossessedMasks.networking;
 
 public class PossessedBehaviour : NetworkBehaviour
 {
