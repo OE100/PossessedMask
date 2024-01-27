@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using GameNetcodeStuff;
+﻿using GameNetcodeStuff;
 using Unity.Netcode;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace PossessedMasksRewrite;
+namespace PossessedMasks;
 
 public static class Utils
 {
@@ -32,29 +29,29 @@ public static class Utils
     
     public static void RegisterAll()
     {
-        if (_registered || !Terminal || !StartOfRound.Instance) return;
+        if (_registered || Terminal == null || StartOfRound.Instance == null) return;
         _registered = true;
         
-        Plugin.Log.LogDebug("Registering all!");
+        Plugin.Log.LogMessage("Registering all!");
         
         ComedyItem = StartOfRound.Instance.allItemsList.itemsList.FirstOrDefault(item => item.itemName == "Comedy");
         TragedyItem = StartOfRound.Instance.allItemsList.itemsList.FirstOrDefault(item => item.itemName == "Tragedy");
         
         // set the base value of the comedy and tragedy items
         if (!ComedyItem)
-            Plugin.Log.LogDebug("Comedy item not found!");
+            Plugin.Log.LogMessage("Comedy item not found!");
         else
         {
-            Plugin.Log.LogDebug("Comedy item found!");
+            Plugin.Log.LogMessage("Comedy item found!");
             ComedyItem.minValue = ModConfig.MinMaskItemBaseValue.Value;
             ComedyItem.maxValue = ModConfig.MaxMaskItemBaseValue.Value;
         }
         
         if (!TragedyItem)
-            Plugin.Log.LogDebug("Tragedy item not found!");
+            Plugin.Log.LogMessage("Tragedy item not found!");
         else
         {
-            Plugin.Log.LogDebug("Tragedy item found!");
+            Plugin.Log.LogMessage("Tragedy item found!");
             TragedyItem.minValue = ModConfig.MinMaskItemBaseValue.Value;
             TragedyItem.maxValue = ModConfig.MaxMaskItemBaseValue.Value;
         }
@@ -64,7 +61,6 @@ public static class Utils
         
         foreach (var level in moons)
         {
-            Plugin.Log.LogDebug($"Registering on level: {level.PlanetName}");
             var rarity = Mathf.Clamp(Mathf.RoundToInt(ModConfig.MaskRarity.Value + 
                                                       (ModConfig.MaskRarityScaling.Value ? addPercent * level.maxTotalScrapValue / 100 : 0)), 0, 100);
             // register enemy prefabs to dictionary
@@ -74,6 +70,8 @@ public static class Utils
                 RegisterEnemyPrefab(prefab.GetComponent<EnemyAI>().GetType(), prefab);
             });
 
+            if (ModConfig.EnableChangeMaskSpawnChance.Value == 0) continue;
+            
             // make masks spawnable on all moons and change rarity
             if (ComedyItem)
             {
