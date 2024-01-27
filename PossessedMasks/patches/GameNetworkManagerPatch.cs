@@ -13,8 +13,6 @@ public class GameNetworkManagerPatch
     [HarmonyPatch(nameof(GameNetworkManager.Start)), HarmonyPostfix, HarmonyPriority(Priority.Last)]
     private static void StartPostfix(GameNetworkManager __instance)
     {
-        Plugin.Log.LogDebug("GameNetworkManager Start");
-        
         // register network prefab
         NetworkManager.Singleton.AddNetworkPrefab(Plugin.NetworkPrefab);
         
@@ -36,11 +34,11 @@ public class GameNetworkManagerPatch
                 StartOfRound.Instance.localPlayerController.Discard_performed;
             IngamePlayerSettings.Instance.playerInput.actions.FindAction("Discard").performed +=
                 PossessedBehaviour.Instance.Discard_with_check_performed;
-            Plugin.Log.LogDebug("Discard override complete");
+            Plugin.Log.LogMessage("Discard override complete");
         }
         catch (Exception)
         {
-            Plugin.Log.LogDebug("Didn't override discard");
+            Plugin.Log.LogMessage("Didn't override discard");
         }
         
         try
@@ -49,10 +47,10 @@ public class GameNetworkManagerPatch
                 StartOfRound.Instance.localPlayerController.Interact_performed;
             IngamePlayerSettings.Instance.playerInput.actions.FindAction("Interact").performed +=
                 PossessedBehaviour.Instance.Interact_with_check_performed;
-            Plugin.Log.LogDebug("Interact override complete");
+            Plugin.Log.LogMessage("Interact override complete");
         } catch (Exception)
         {
-            Plugin.Log.LogDebug("Didn't override interact");
+            Plugin.Log.LogMessage("Didn't override interact");
         }
     }
 }
