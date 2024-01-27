@@ -5,6 +5,9 @@ Tweaks spawn chances of masks to allow them to spawn on all moons.
 
 # Releases
 
+# Version 2.0.2
+- Fixed a leftover bug that was created by the last updates' fix
+
 # Version 2.0.1
 - Fixed bug where if the masks item wasn't in a level but the config setting `EnableChangeMaskSpawnChance` wasn't on 2 it would cause an error
 
