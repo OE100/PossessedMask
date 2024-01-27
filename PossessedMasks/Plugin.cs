@@ -13,7 +13,7 @@ public class Plugin : BaseUnityPlugin
 
     public const string Guid = "oe.tweaks.qol.possessedmasks";
     internal const string Name = "Possessed Masks";
-    public const string Version = "2.0.0";
+    public const string Version = "2.0.2";
 
     internal static Plugin Instance;
 

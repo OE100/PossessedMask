@@ -8,8 +8,6 @@ public class TerminalPatch
     [HarmonyPatch(nameof(Terminal.Start)), HarmonyPostfix]
     private static void StartPostfix(Terminal __instance)
     {
-        Plugin.Log.LogDebug("Terminal Awake");
-        
         // set the terminal
         Utils.Terminal = __instance;
         
