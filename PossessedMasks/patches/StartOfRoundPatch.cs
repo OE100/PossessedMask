@@ -1,5 +1,7 @@
-﻿using HarmonyLib;
+﻿using System.Collections;
+using HarmonyLib;
 using PossessedMasks.mono;
+using PossessedMasks.networking;
 using Unity.Netcode;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -34,6 +36,18 @@ public class StartOfRoundPatch
             
             // register all if not already done
             Utils.RegisterAll();
+            
+            // set network variables
+            __instance.StartCoroutine(DelayedSetNetworkVariables());
         }
+    }
+
+    private static IEnumerator DelayedSetNetworkVariables()
+    {
+        yield return new WaitUntil(() => ModConfig.Loaded);
+        yield return new WaitUntil(() => PossessedBehaviour.Instance != null);
+        PossessedBehaviour.Instance.SetNetworkVariablesServerRpc(
+            ModConfig.NumberOfSlotsFilledToEnableDroppingMask.Value,
+            ModConfig.TwoHandedItemBehaviour.Value);
     }
 }

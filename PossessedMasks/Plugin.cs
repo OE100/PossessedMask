@@ -2,10 +2,12 @@
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using PossessedMasks.networking;
 using UnityEngine;
 
 namespace PossessedMasks;
 
+[BepInDependency(LethalLib.Plugin.ModGUID, LethalLib.Plugin.ModVersion)]
 [BepInPlugin(Guid, Name, Version)]
 public class Plugin : BaseUnityPlugin
 {
@@ -49,7 +51,9 @@ public class Plugin : BaseUnityPlugin
         Utils.SlotSwitchSounds.Add(_ab.LoadAsset<AudioClip>("slot1"));
         Utils.SlotSwitchSounds.Add(_ab.LoadAsset<AudioClip>("slot2"));
 
-        NetworkPrefab = _ab.LoadAsset<GameObject>("PMNetPrefab.prefab");
+        // NetworkPrefab = _ab.LoadAsset<GameObject>("PMNetPrefab.prefab");
+        NetworkPrefab = LethalLib.Modules.NetworkPrefabs.CreateNetworkPrefab("PMNetPrefab");
+        NetworkPrefab.AddComponent<PossessedBehaviour>();
         
         InitializeNetworkRoutine();
         

@@ -10,8 +10,8 @@ public class PossessedBehaviour : NetworkBehaviour
 {
     public static PossessedBehaviour Instance { get; private set; }
     
-    public readonly NetworkVariable<int> ItemCount = new(ModConfig.NumberOfSlotsFilledToEnableDroppingMask.Value);
-    public readonly NetworkVariable<bool> TwoHandedBehaviour = new(ModConfig.TwoHandedItemBehaviour.Value);
+    public readonly NetworkVariable<int> ItemCount = new();
+    public readonly NetworkVariable<bool> TwoHandedBehaviour = new();
 
     private static bool IsMyPlayer(ulong ownerId)
     {
@@ -32,6 +32,13 @@ public class PossessedBehaviour : NetworkBehaviour
         Instance = null;
     }
 
+    [ServerRpc]
+    public void SetNetworkVariablesServerRpc(int itemCount, bool twoHandedBehaviour)
+    {
+        ItemCount.Value = itemCount;
+        TwoHandedBehaviour.Value = twoHandedBehaviour;
+    }
+    
     [ServerRpc]
     public void StartPossessionServerRpc(ulong ownerId)
     {

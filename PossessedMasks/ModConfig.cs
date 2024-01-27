@@ -4,6 +4,8 @@ namespace PossessedMasks;
 
 public class ModConfig
 {
+    internal static bool Loaded { get; private set; }
+    
     internal static ConfigEntry<bool> EnableMaskPossessionMechanic; // if true, mask possession mechanic will be enabled
     internal static ConfigEntry<bool> EnableMaskSwitchSlotMechanic; // if true, mask switching to your active slot mechanic will be enabled
     internal static ConfigEntry<int> EnableChangeMaskSpawnChance; // if 0, will not override mask spawn chance, scrap value and available levels. if 1, will override spawn chance, scrap value but not available levels, if 2 will override all of them. 
@@ -72,6 +74,8 @@ public class ModConfig
         MinTimeToPossessPlayer = config.Bind("Item Activation Time", "MinTimeToPossessPlayer", 2f, "Minimum time of actual possession");
         MaxTimeToPossessPlayer = config.Bind("Item Activation Time", "MaxTimeToPossessPlayer", 4f, "Maximum time of actual possession");
         DeltaTimeToPossessPlayer = config.Bind("Item Activation Time", "DeltaTimeToPossessPlayer", 1f, "Time to add to min and max each time a possession happens");
-        MaxPossessingPlayerTime = config.Bind("Item Activation Time", "MaxPossessingPlayerTime", 9f, "The number at which adding to min and max stops");        
+        MaxPossessingPlayerTime = config.Bind("Item Activation Time", "MaxPossessingPlayerTime", 9f, "The number at which adding to min and max stops");
+        
+        Loaded = true;
     }
 }
