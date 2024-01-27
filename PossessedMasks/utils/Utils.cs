@@ -84,8 +84,11 @@ public static class Utils
                 var levelIndex =
                     level.spawnableScrap.FindIndex(item => item.spawnableItem.itemName == ComedyItem.itemName);
                 
-                if (levelIndex == -1 && ModConfig.EnableChangeMaskSpawnChance.Value == 2)
-                    level.spawnableScrap.Add(comedyWithRarity);
+                if (levelIndex == -1)
+                {
+                    if (ModConfig.EnableChangeMaskSpawnChance.Value == 2)
+                        level.spawnableScrap.Add(comedyWithRarity);
+                }
                 else
                     level.spawnableScrap[levelIndex] = comedyWithRarity;
             }
@@ -101,8 +104,11 @@ public static class Utils
                 var levelIndex =
                     level.spawnableScrap.FindIndex(item => item.spawnableItem.itemName == TragedyItem.itemName);
                 
-                if (levelIndex == -1 && ModConfig.EnableChangeMaskSpawnChance.Value == 2)
-                    level.spawnableScrap.Add(tragedyWithRarity);
+                if (levelIndex == -1)
+                {
+                    if (ModConfig.EnableChangeMaskSpawnChance.Value == 2)
+                        level.spawnableScrap.Add(tragedyWithRarity);
+                }
                 else
                     level.spawnableScrap[levelIndex] = tragedyWithRarity;
             }
