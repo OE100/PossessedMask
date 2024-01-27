@@ -2,6 +2,7 @@
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Random = UnityEngine.Random;
 
 namespace PossessedMasksRewrite.networking;
 
@@ -45,8 +46,9 @@ public class PossessedBehaviour : NetworkBehaviour
             if (!StartOfRound.Instance.localPlayerController.currentlyHeldObjectServer ||
                 StartOfRound.Instance.localPlayerController.currentlyHeldObjectServer is not HauntedMaskItem mask) 
                 return;
-            
-            Utils.PlayRandomAudioClipFromList(mask.maskAudio, Utils.PossessionSounds);
+
+            if (Random.Range(0f, 1f) >= 0.33)
+                Utils.PlayRandomAudioClipFromList(mask.maskAudio, Utils.PossessionSounds);
             mask.ActivateItemServerRpc(true, true);
             mask.ItemActivate(true, true);
         }
@@ -97,8 +99,9 @@ public class PossessedBehaviour : NetworkBehaviour
         var potentialMask = localPlayer.ItemSlots[maskSlot];
             
         // play sound from the mask
-        if (potentialMask && potentialMask is HauntedMaskItem mask)
-            Utils.PlayRandomAudioClipFromList(mask.maskAudio, Utils.SlotSwitchSounds);
+        if (Random.Range(0f, 1f) >= 0.33)
+            if (potentialMask && potentialMask is HauntedMaskItem mask)
+                Utils.PlayRandomAudioClipFromList(mask.maskAudio, Utils.SlotSwitchSounds);
 
         // disable some actions until done
         localPlayer.playerActions.FindAction("ActivateItem").Disable();
@@ -134,7 +137,7 @@ public class PossessedBehaviour : NetworkBehaviour
     {
         var localPlayer = StartOfRound.Instance.localPlayerController;
         var heldObject = localPlayer.currentlyHeldObject;
-        if (Utils.InLevel && heldObject && heldObject is HauntedMaskItem &&
+        if (Utils.InLevel && heldObject == null && heldObject is HauntedMaskItem &&
             Utils.ItemCount(localPlayer) < ItemCount.Value) return;
         localPlayer.Discard_performed(context);
     }
