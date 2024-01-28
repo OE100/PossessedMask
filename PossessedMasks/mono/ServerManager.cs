@@ -8,14 +8,16 @@ namespace PossessedMasks.mono;
 
 public class ServerManager : MonoBehaviour
 {
+    internal static ServerManager Instance; 
+    
     private int _currIndex;
     private bool _usingData = false;
     private readonly Dictionary<PlayerControllerB, PlayerProps> _playerProps = new();
-    private readonly List<PlayerControllerB> _activePlayers = [];
+    internal readonly List<PlayerControllerB> ActivePlayers = [];
 
     private float _avgFrameTime;
 
-    private bool ShouldUpdate => Utils.InLevel && _activePlayers.Count > 0;
+    private bool ShouldUpdate => Utils.InLevel && ActivePlayers.Count > 0;
     
     private class PlayerProps
     {
@@ -65,25 +67,25 @@ public class ServerManager : MonoBehaviour
         
         if (!ShouldUpdate)
         {
-            if (_activePlayers.Count == 0 && _currIndex == 0) return;
+            if (ActivePlayers.Count == 0 && _currIndex == 0) return;
 
-            _activePlayers.Clear();
+            ActivePlayers.Clear();
             _currIndex = 0;
 
             return;
         }
 
-        var player = _activePlayers[_currIndex];
+        var player = ActivePlayers[_currIndex];
         if (!_usingData && Utils.IsActivePlayer(player))
         {
             _usingData = true;
             DoInterval(player);
             _usingData = false;
-            _currIndex = (_currIndex + 1) % _activePlayers.Count;
+            _currIndex = (_currIndex + 1) % ActivePlayers.Count;
         }
         else
         {
-            _activePlayers.Remove(player);
+            ActivePlayers.Remove(player);
             _currIndex = 0;
         }
     }
@@ -97,7 +99,7 @@ public class ServerManager : MonoBehaviour
 
         if (!_playerProps.TryGetValue(player, out var props)) return;
 
-        var delta = _avgFrameTime * _activePlayers.Count;
+        var delta = _avgFrameTime * ActivePlayers.Count;
         if (ModConfig.EnableMaskSwitchSlotMechanic.Value)
             props.TimeUntilSlotSwitch -= delta;
         if (ModConfig.EnableMaskPossessionMechanic.Value)
@@ -140,10 +142,10 @@ public class ServerManager : MonoBehaviour
     {
         yield return new WaitUntil(() => !_usingData);
         _usingData = true;
-        _activePlayers.Clear();
+        ActivePlayers.Clear();
         _playerProps.Clear();
-        _activePlayers.AddRange(StartOfRound.Instance.allPlayerScripts.Where(Utils.IsActivePlayer));
-        _activePlayers.ForEach(player => _playerProps[player] = new PlayerProps());
+        ActivePlayers.AddRange(StartOfRound.Instance.allPlayerScripts.Where(Utils.IsActivePlayer));
+        ActivePlayers.ForEach(player => _playerProps[player] = new PlayerProps());
         _usingData = false;
     }
     

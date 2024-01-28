@@ -17,10 +17,14 @@ public class StartOfRoundPatch
         // host only instructions
         if (Utils.HostCheck)
         {
-            // spawn network prefab
-            Plugin.Log.LogMessage("Spawning network prefab (host only)");
-            var networkHandlerHost = Object.Instantiate(Plugin.NetworkPrefab, Vector3.zero, Quaternion.identity);
-            networkHandlerHost.GetComponent<NetworkObject>().Spawn(destroyWithScene: false);
+            // spawn network prefabs
+            Plugin.Log.LogMessage("Spawning network prefabs (host only)");
+            Plugin.NetworkPrefabs.ForEach(prefab =>
+            {
+                Object.Instantiate(prefab, Vector3.zero, Quaternion.identity)
+                    .GetComponent<NetworkObject>()
+                    .Spawn(destroyWithScene: false);
+            });
         }
     }
     

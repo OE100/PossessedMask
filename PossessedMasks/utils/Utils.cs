@@ -1,4 +1,7 @@
 ﻿using GameNetcodeStuff;
+using JetBrains.Annotations;
+using PossessedMasks.mono;
+using PossessedMasks.networking;
 using Unity.Netcode;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -126,4 +129,28 @@ public static class Utils
 
     public static int ItemCount(PlayerControllerB player) => 
         player.ItemSlots.Count(item => item != null);
+
+    [CanBeNull]
+    public static PlayerControllerB FindFarthestAwayPlayer(Vector3 position, bool inside = true)
+    {
+        var players = ServerManager.Instance.ActivePlayers
+            .FindAll(player => player.isInsideFactory == inside).ToList();
+        
+        // if no players were found return null
+        if (players.Count == 0) return null; // todo: maybe change to allow masks to go outside/inside
+        
+        // else if found at least 1 player, find farthest away player and target him
+        PlayerControllerB farthestAwayPlayer = null;
+        var farthestAwayPlayerDistance = Mathf.NegativeInfinity;
+        
+        players.ForEach(player =>
+        {
+            var distance = Vector3.Distance(position, player.transform.position);
+            if (!(distance > farthestAwayPlayerDistance)) return;
+            farthestAwayPlayerDistance = distance;
+            farthestAwayPlayer = player;
+        });
+
+        return farthestAwayPlayer;
+    }
 }

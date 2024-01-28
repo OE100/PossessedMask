@@ -19,7 +19,7 @@ public class Plugin : BaseUnityPlugin
 
     internal static Plugin Instance;
 
-    internal static GameObject NetworkPrefab;
+    internal static List<GameObject> NetworkPrefabs = [];
 
     internal static ManualLogSource Log;
 
@@ -51,9 +51,13 @@ public class Plugin : BaseUnityPlugin
         Utils.SlotSwitchSounds.Add(_ab.LoadAsset<AudioClip>("slot1"));
         Utils.SlotSwitchSounds.Add(_ab.LoadAsset<AudioClip>("slot2"));
 
-        // NetworkPrefab = _ab.LoadAsset<GameObject>("PMNetPrefab.prefab");
-        NetworkPrefab = LethalLib.Modules.NetworkPrefabs.CreateNetworkPrefab("PMNetPrefab");
-        NetworkPrefab.AddComponent<PossessedBehaviour>();
+        var possessedBehaviour = LethalLib.Modules.NetworkPrefabs.CreateNetworkPrefab("PossessedBehaviour");
+        possessedBehaviour.AddComponent<PossessedBehaviour>();
+        NetworkPrefabs.Add(possessedBehaviour);
+        
+        var crawlingBehaviour = LethalLib.Modules.NetworkPrefabs.CreateNetworkPrefab("CrawlingBehaviour");
+        crawlingBehaviour.AddComponent<CrawlingBehaviour>();
+        NetworkPrefabs.Add(crawlingBehaviour);
         
         InitializeNetworkRoutine();
         

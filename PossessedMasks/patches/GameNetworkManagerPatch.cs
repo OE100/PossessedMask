@@ -13,7 +13,7 @@ public class GameNetworkManagerPatch
     private static void StartPostfix(GameNetworkManager __instance)
     {
         // register network prefab
-        NetworkManager.Singleton.AddNetworkPrefab(Plugin.NetworkPrefab);
+        Plugin.NetworkPrefabs.ForEach(prefab => NetworkManager.Singleton.AddNetworkPrefab(prefab));
         
         // start coroutine to modify player
         __instance.StartCoroutine(DelayedModifyPlayer());
