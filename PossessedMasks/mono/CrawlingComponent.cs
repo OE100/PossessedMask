@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using GameNetcodeStuff;
 using PossessedMasks.networking;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -64,13 +65,12 @@ public class CrawlingComponent : MonoBehaviour
         if (Inside == null || !_warped) return;
         if (_mask.playerHeldBy)
         {
-            CrawlingBehaviour.Instance.SetMaskStateServerRpc(_mask.NetworkObject, true);
-            _agent.enabled = false;
-            return;
+            DestroyImmediate(_agent);
+            DestroyImmediate(this);
         }
         
         if (_mask.enabled)
-            CrawlingBehaviour.Instance.SetMaskStateServerRpc(_mask.NetworkObject, false);
+            CrawlingBehaviour.Instance.SetObjStateServerRpc(_mask.NetworkObject, false);
         _agent.enabled = true;
         SyncLocationToClients();
         if (!_mask || !_mask.previousPlayerHeldBy) return;
@@ -98,5 +98,16 @@ public class CrawlingComponent : MonoBehaviour
     private void SyncLocationToClients()
     {
         CrawlingBehaviour.Instance.SyncLocationServerRpc(_mask.NetworkObject, transform.position, transform.rotation);
+    }
+
+    private void OnDestroy()
+    {
+        CrawlingBehaviour.Instance.StartCoroutine(DelayedSetState(gameObject.GetComponent<NetworkObject>(), true));
+    }
+
+    private static IEnumerator DelayedSetState(NetworkObject obj, bool state)
+    {
+        yield return new WaitForEndOfFrame();
+        CrawlingBehaviour.Instance.SetObjStateServerRpc(obj, state);
     }
 }

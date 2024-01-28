@@ -9,9 +9,6 @@ namespace PossessedMasks.networking;
 public class PossessedBehaviour : NetworkBehaviour
 {
     public static PossessedBehaviour Instance { get; private set; }
-    
-    public readonly NetworkVariable<int> ItemCount = new();
-    public readonly NetworkVariable<bool> TwoHandedBehaviour = new();
 
     private static bool IsMyPlayer(ulong ownerId)
     {
@@ -24,6 +21,7 @@ public class PossessedBehaviour : NetworkBehaviour
     {
         base.OnNetworkSpawn();
         Instance = this;
+        StartCoroutine(SharedConfig.DelayedRequestConfig());
     }
     
     public override void OnNetworkDespawn()
@@ -32,11 +30,26 @@ public class PossessedBehaviour : NetworkBehaviour
         Instance = null;
     }
 
-    [ServerRpc]
-    public void SetNetworkVariablesServerRpc(int itemCount, bool twoHandedBehaviour)
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestConfigServerRpc()
     {
-        ItemCount.Value = itemCount;
-        TwoHandedBehaviour.Value = twoHandedBehaviour;
+        if (!Utils.HostCheck) return;
+        StartCoroutine(DelayedSendConfig());
+    }
+
+    private IEnumerator DelayedSendConfig()
+    {
+        yield return new WaitUntil(() => ModConfig.Loaded);
+        SendConfigClientRpc(ModConfig.NumberOfSlotsFilledToEnableDroppingMask.Value, 
+            ModConfig.TwoHandedItemBehaviour.Value);
+    }
+    
+    [ClientRpc]
+    private void SendConfigClientRpc(int itemCount, bool twoHandedBehaviour)
+    {
+        if (Utils.HostCheck) return;
+        SharedConfig.ItemCount = itemCount;
+        SharedConfig.TwoHandedBehaviour = twoHandedBehaviour;
     }
     
     [ServerRpc]
@@ -123,7 +136,7 @@ public class PossessedBehaviour : NetworkBehaviour
         }
         
         // drop 2 handed item if it's being held and 2 handed item behaviour is enabled
-        if (TwoHandedBehaviour.Value && localPlayer.twoHanded)
+        if (SharedConfig.TwoHandedBehaviour && localPlayer.twoHanded)
         {
             var heldObject = localPlayer.currentlyHeldObject;
             yield return StartCoroutine(localPlayer.waitToEndOfFrameToDiscard());
@@ -145,7 +158,7 @@ public class PossessedBehaviour : NetworkBehaviour
         var localPlayer = StartOfRound.Instance.localPlayerController;
         var heldObject = localPlayer.currentlyHeldObject;
         if (Utils.InLevel && heldObject == null && heldObject is HauntedMaskItem &&
-            Utils.ItemCount(localPlayer) < ItemCount.Value) return;
+            Utils.ItemCount(localPlayer) < SharedConfig.ItemCount) return;
         localPlayer.Discard_performed(context);
     }
 
@@ -154,7 +167,7 @@ public class PossessedBehaviour : NetworkBehaviour
         var localPlayer = StartOfRound.Instance.localPlayerController;
         var heldObject = localPlayer.currentlyHeldObject;
         if (Utils.InLevel && heldObject && heldObject is HauntedMaskItem &&
-            (localPlayer.activatingItem || Utils.ItemCount(localPlayer) < ItemCount.Value)) return;
+            (localPlayer.activatingItem || Utils.ItemCount(localPlayer) < SharedConfig.ItemCount)) return;
         localPlayer.Interact_performed(context);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Unity.Netcode;
+﻿using System.Collections;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -37,16 +38,16 @@ public class CrawlingBehaviour : NetworkBehaviour
     }
     
     [ServerRpc]
-    public void SetMaskStateServerRpc(NetworkObjectReference maskRef, bool state)
+    public void SetObjStateServerRpc(NetworkObjectReference objRef, bool state)
     {
-        SetMaskStateClientRpc(maskRef, state);
+        SetObjStateClientRpc(objRef, state);
     }
 
     [ClientRpc]
-    private void SetMaskStateClientRpc(NetworkObjectReference maskRef, bool state)
+    private void SetObjStateClientRpc(NetworkObjectReference objRef, bool state)
     {
-        if (!maskRef.TryGet(out var networkObject)) return;
-        var mask = networkObject.gameObject.GetComponent<HauntedMaskItem>();
-        mask.enabled = state;
+        if (!objRef.TryGet(out var networkObject)) return;
+        var obj = networkObject.gameObject.GetComponent<GrabbableObject>();
+        obj.enabled = state;
     }
 }
