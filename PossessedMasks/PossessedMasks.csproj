@@ -9,6 +9,11 @@
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
       <DebugSymbols>true</DebugSymbols>
+      <DebugType>embedded</DebugType>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DebugType>embedded</DebugType>
     </PropertyGroup>
 
     <ItemGroup>
@@ -32,4 +37,11 @@
       <None Remove="assets\possessedmasks" />
       <EmbeddedResource Include="assets\possessedmasks" />
     </ItemGroup>
+
+    <Target Name="CopyToTestProfile" DependsOnTargets="NetcodePatch" AfterTargets="PostBuildEvent">
+        <PropertyGroup>
+            <PackFolder>$(SolutionDir)PossessedMasks/pack</PackFolder>
+        </PropertyGroup>
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PackFolder)" />
+    </Target>
 </Project>
