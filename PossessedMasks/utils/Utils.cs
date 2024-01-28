@@ -1,7 +1,6 @@
 ﻿using GameNetcodeStuff;
 using JetBrains.Annotations;
 using PossessedMasks.mono;
-using PossessedMasks.networking;
 using Unity.Netcode;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -129,8 +128,7 @@ public static class Utils
 
     public static int ItemCount(PlayerControllerB player) => 
         player.ItemSlots.Count(item => item != null);
-
-    [CanBeNull]
+    
     public static PlayerControllerB FindFarthestAwayPlayer(Vector3 position, bool inside = true)
     {
         var players = ServerManager.Instance.ActivePlayers

@@ -7,13 +7,24 @@ namespace PossessedMasks.patches;
 public class HauntedMaskItemPatch
 {
     [HarmonyPatch(nameof(HauntedMaskItem.DiscardItem)), HarmonyPrefix]
-    private static void DiscardItemPostfix(HauntedMaskItem __instance)
+    private static void DiscardItemPrefix(HauntedMaskItem __instance)
     {
-        if (!Utils.HostCheck) return;
-        var crawlingComponent = __instance.gameObject.GetComponent<CrawlingComponent>();
-        if (crawlingComponent)
-            crawlingComponent.inside = __instance.playerHeldBy.isInsideFactory;
-        else
-            __instance.gameObject.AddComponent<CrawlingComponent>().inside = __instance.playerHeldBy.isInsideFactory;
+        Plugin.Log.LogDebug("DiscardItemPrefix");
+        if (Utils.HostCheck)
+        {
+            Plugin.Log.LogDebug("DiscardItemPrefix: host check passed");
+            var crawlingComponent = __instance.gameObject.GetComponent<CrawlingComponent>();
+            if (crawlingComponent)
+            {
+                Plugin.Log.LogDebug("DiscardItemPrefix: crawling component found");
+                crawlingComponent.Inside = __instance.playerHeldBy.isInsideFactory;
+            }
+            else
+            {
+                Plugin.Log.LogDebug("DiscardItemPrefix: crawling component not found");
+                __instance.gameObject.AddComponent<CrawlingComponent>().Inside =
+                    __instance.playerHeldBy.isInsideFactory;
+            }
+        }
     }
 }

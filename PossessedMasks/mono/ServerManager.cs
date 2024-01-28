@@ -59,6 +59,7 @@ public class ServerManager : MonoBehaviour
     private void Start()
     {
         StartCoroutine(WaitUntilAllowed());
+        Instance = this;
     }
     
     private void Update()
@@ -89,7 +90,12 @@ public class ServerManager : MonoBehaviour
             _currIndex = 0;
         }
     }
-    
+
+    private void OnDestroy()
+    {
+        Instance = null;
+    }
+
     private void DoInterval(PlayerControllerB player)
     {
         // check for mask

@@ -21,15 +21,32 @@ public class CrawlingBehaviour : NetworkBehaviour
     }
 
     [ServerRpc]
-    public void SyncLocationServerRpc(NetworkObjectReference maskRef, Vector3 position)
+    public void SyncLocationServerRpc(NetworkObjectReference maskRef, Vector3 position, Quaternion rotation)
     {
-        SyncLocationClientRpc(maskRef, position);
+        SyncLocationClientRpc(maskRef, position, rotation);
     }
 
     [ClientRpc]
-    private void SyncLocationClientRpc(NetworkObjectReference maskRef, Vector3 position)
+    private void SyncLocationClientRpc(NetworkObjectReference maskRef, Vector3 position, Quaternion rotation)
+    {
+        if (Utils.HostCheck) return;
+        if (!maskRef.TryGet(out var networkObject)) return;
+        var obj = networkObject.gameObject;
+        obj.transform.position = position;
+        obj.transform.rotation = rotation;
+    }
+    
+    [ServerRpc]
+    public void SetMaskStateServerRpc(NetworkObjectReference maskRef, bool state)
+    {
+        SetMaskStateClientRpc(maskRef, state);
+    }
+
+    [ClientRpc]
+    private void SetMaskStateClientRpc(NetworkObjectReference maskRef, bool state)
     {
         if (!maskRef.TryGet(out var networkObject)) return;
-        networkObject.gameObject.transform.position = position;
+        var mask = networkObject.gameObject.GetComponent<HauntedMaskItem>();
+        mask.enabled = state;
     }
 }
