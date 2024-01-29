@@ -5,6 +5,9 @@ Tweaks spawn chances of masks to allow them to spawn on all moons.
 
 # Releases
 
+# Version 2.0.3
+- Fixed config sync not working correctly, this should fix the issue where you could drop the mask regardless of how many items you had in your inventory.
+
 # Version 2.0.2
 - Fixed a leftover bug that was created by the last updates' fix
 
