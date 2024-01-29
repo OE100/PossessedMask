@@ -153,20 +153,20 @@ public class PossessedBehaviour : NetworkBehaviour
         localPlayer.playerActions.FindAction("SwitchItem").Enable();
     } 
 
-    internal void Discard_with_check_performed(InputAction.CallbackContext context)
+    internal static void Discard_with_check_performed(InputAction.CallbackContext context)
     {
         var localPlayer = StartOfRound.Instance.localPlayerController;
-        var heldObject = localPlayer.currentlyHeldObject;
-        if (Utils.InLevel && heldObject == null && heldObject is HauntedMaskItem &&
+        var heldObject = localPlayer.currentlyHeldObjectServer;
+        if (Utils.InLevel && heldObject is HauntedMaskItem &&
             Utils.ItemCount(localPlayer) < SharedConfig.ItemCount) return;
         localPlayer.Discard_performed(context);
     }
 
-    internal void Interact_with_check_performed(InputAction.CallbackContext context)
+    internal static void Interact_with_check_performed(InputAction.CallbackContext context)
     {
         var localPlayer = StartOfRound.Instance.localPlayerController;
-        var heldObject = localPlayer.currentlyHeldObject;
-        if (Utils.InLevel && heldObject && heldObject is HauntedMaskItem &&
+        var heldObject = localPlayer.currentlyHeldObjectServer;
+        if (Utils.InLevel && heldObject is HauntedMaskItem &&
             (localPlayer.activatingItem || Utils.ItemCount(localPlayer) < SharedConfig.ItemCount)) return;
         localPlayer.Interact_performed(context);
     }

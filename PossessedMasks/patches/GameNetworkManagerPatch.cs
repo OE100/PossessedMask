@@ -32,7 +32,7 @@ public class GameNetworkManagerPatch
             IngamePlayerSettings.Instance.playerInput.actions.FindAction("Discard").performed -=
                 StartOfRound.Instance.localPlayerController.Discard_performed;
             IngamePlayerSettings.Instance.playerInput.actions.FindAction("Discard").performed +=
-                PossessedBehaviour.Instance.Discard_with_check_performed;
+                PossessedBehaviour.Discard_with_check_performed;
             Plugin.Log.LogMessage("Discard override complete");
         }
         catch (Exception)
@@ -45,7 +45,7 @@ public class GameNetworkManagerPatch
             IngamePlayerSettings.Instance.playerInput.actions.FindAction("Interact").performed -=
                 StartOfRound.Instance.localPlayerController.Interact_performed;
             IngamePlayerSettings.Instance.playerInput.actions.FindAction("Interact").performed +=
-                PossessedBehaviour.Instance.Interact_with_check_performed;
+                PossessedBehaviour.Interact_with_check_performed;
             Plugin.Log.LogMessage("Interact override complete");
         } catch (Exception)
         {

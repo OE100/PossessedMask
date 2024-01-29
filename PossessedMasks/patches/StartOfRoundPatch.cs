@@ -1,7 +1,5 @@
-﻿using System.Collections;
-using HarmonyLib;
+﻿using HarmonyLib;
 using PossessedMasks.mono;
-using PossessedMasks.networking;
 using Unity.Netcode;
 using UnityEngine;
 using Object = UnityEngine.Object;
