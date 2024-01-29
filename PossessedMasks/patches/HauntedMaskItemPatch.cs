@@ -9,17 +9,16 @@ public class HauntedMaskItemPatch
     [HarmonyPatch(nameof(HauntedMaskItem.DiscardItem)), HarmonyPrefix]
     private static void DiscardItemPrefix(HauntedMaskItem __instance)
     {
-        if (Utils.HostCheck)
+        if (!Utils.HostCheck) return;
+        if (!Utils.InLevel) return;
+        if (false && SharedConfig.LurkingMechanicEnabled) // todo: remove false when it's ready
         {
-            if (Utils.InLevel)
-            {
-                var crawlingComponent = __instance.gameObject.GetComponent<CrawlingComponent>();
-                if (crawlingComponent)
-                    crawlingComponent.Inside = __instance.playerHeldBy.isInsideFactory;
-                else
-                    __instance.gameObject.AddComponent<CrawlingComponent>().Inside =
-                        __instance.playerHeldBy.isInsideFactory;
-            }
+            var crawlingComponent = __instance.gameObject.GetComponent<CrawlingComponent>();
+            if (crawlingComponent)
+                crawlingComponent.Inside = __instance.playerHeldBy.isInsideFactory;
+            else
+                __instance.gameObject.AddComponent<CrawlingComponent>().Inside =
+                    __instance.playerHeldBy.isInsideFactory;
         }
     }
 }

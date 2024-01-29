@@ -1,9 +1,9 @@
 {
     "name": "Possessed_Masks",
-    "version_number": "2.0.2",
+    "version_number": "2.0.3",
     "website_url": "https://github.com/OE100/PossessedMask",
     "description": "A ghost haunts your masks, the mask will try to get in your active slot and possess you. Tweaks spawn chances of masks to allow them to spawn on all moons.",
     "dependencies": [
-	"Evaisa-LethalLib-0.13.2"
+	"Evaisa-LethalLib-0.14.1"
     ]
 }

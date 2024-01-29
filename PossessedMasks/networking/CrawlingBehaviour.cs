@@ -20,6 +20,26 @@ public class CrawlingBehaviour : NetworkBehaviour
         base.OnNetworkDespawn();
         Instance = null;
     }
+    
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestConfigServerRpc()
+    {
+        if (!Utils.HostCheck) return;
+        StartCoroutine(DelayedSendConfig());
+    }
+    
+    private IEnumerator DelayedSendConfig()
+    {
+        yield return new WaitUntil(() => ModConfig.Loaded);
+        SendConfigClientRpc(ModConfig.EnableMaskLurkingMechanic.Value);
+    }
+    
+    [ClientRpc]
+    private void SendConfigClientRpc(bool lurkingMechanicEnabled)
+    {
+        if (Utils.HostCheck) return;
+        SharedConfig.LurkingMechanicEnabled = lurkingMechanicEnabled;
+    }
 
     [ServerRpc]
     public void SyncLocationServerRpc(NetworkObjectReference maskRef, Vector3 position, Quaternion rotation)
