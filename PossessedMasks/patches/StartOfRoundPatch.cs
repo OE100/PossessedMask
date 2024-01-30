@@ -40,4 +40,16 @@ public class StartOfRoundPatch
             Utils.RegisterAll();
         }
     }
+    
+    [HarmonyPatch(nameof(StartOfRound.OnShipLandedMiscEvents)), HarmonyPostfix]
+    private static void OnShipLandedMiscEventsPostfix()
+    {
+        // client only instructions
+        if (Utils.HostCheck)
+        {
+            // find all ai nodes on the map
+            Utils.InsideAINodes = GameObject.FindGameObjectsWithTag("AINode");
+            Utils.OutsideAINodes = GameObject.FindGameObjectsWithTag("OutsideAINode");
+        }
+    }
 }

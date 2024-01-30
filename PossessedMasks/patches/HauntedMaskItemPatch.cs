@@ -11,7 +11,7 @@ public class HauntedMaskItemPatch
     {
         if (!Utils.HostCheck) return;
         if (!Utils.InLevel) return;
-        if (false && SharedConfig.LurkingMechanicEnabled) // todo: remove false when it's ready
+        if (SharedConfig.LurkingMechanicEnabled)
         {
             var crawlingComponent = __instance.gameObject.GetComponent<CrawlingComponent>();
             if (crawlingComponent)

@@ -3,6 +3,7 @@ using JetBrains.Annotations;
 using PossessedMasks.mono;
 using Unity.Netcode;
 using UnityEngine;
+using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
 namespace PossessedMasks;
@@ -22,6 +23,9 @@ public static class Utils
     public static bool HostCheck => NetworkManager.Singleton.IsHost || NetworkManager.Singleton.IsServer;
     public static bool InLevel =>
         StartOfRound.Instance && !StartOfRound.Instance.inShipPhase && StartOfRound.Instance.currentLevelID != 3;
+
+    public static GameObject[] InsideAINodes;
+    public static GameObject[] OutsideAINodes;
     
     public static void RegisterEnemyPrefab(Type enemyAI, GameObject prefab)
     {
@@ -128,27 +132,50 @@ public static class Utils
 
     public static int ItemCount(PlayerControllerB player) => 
         player.ItemSlots.Count(item => item != null);
-    
-    public static PlayerControllerB FindFarthestAwayPlayer(Vector3 position, bool inside = true)
-    {
-        var players = ServerManager.Instance.ActivePlayers
-            .FindAll(player => player.isInsideFactory == inside).ToList();
-        
-        // if no players were found return null
-        if (players.Count == 0) return null; // todo: maybe change to allow masks to go outside/inside
-        
-        // else if found at least 1 player, find farthest away player and target him
-        PlayerControllerB farthestAwayPlayer = null;
-        var farthestAwayPlayerDistance = Mathf.NegativeInfinity;
-        
-        players.ForEach(player =>
-        {
-            var distance = Vector3.Distance(position, player.transform.position);
-            if (!(distance > farthestAwayPlayerDistance)) return;
-            farthestAwayPlayerDistance = distance;
-            farthestAwayPlayer = player;
-        });
 
-        return farthestAwayPlayer;
+    public static List<PlayerControllerB> GetActivePlayers(bool inside)
+    {
+        if (!ServerManager.Instance) return [];
+        return ServerManager.Instance.ActivePlayers.FindAll(player => player.isInsideFactory == inside);
+    }
+    
+    public static (bool, T) FindFarthestAwayThingFromPosition<T>(Vector3 position, 
+        List<T> things, Func<T, Vector3> getThingPosition)
+    {
+        if (!things.Any()) return (false, default);
+        T farthestAwayThing = default;
+        var farthestAwayThingDistance = Mathf.NegativeInfinity;
+        var found = false;
+
+        things.ForEach(thing =>
+        {
+            var distance = Vector3.Distance(position, getThingPosition(thing));
+            if (!(distance > farthestAwayThingDistance)) return;
+            farthestAwayThingDistance = distance;
+            farthestAwayThing = thing;
+            found = true;
+        });
+        
+        return (found, farthestAwayThing);
+    }
+    
+    public static (bool, T) FindClosestThingToPosition<T>(Vector3 position, 
+        List<T> things, Func<T, Vector3> getThingPosition)
+    {
+        if (!things.Any()) return (false, default);
+        T closestThing = default;
+        var closestThingDistance = Mathf.Infinity;
+        var found = false;
+
+        things.ForEach(thing =>
+        {
+            var distance = Vector3.Distance(position, getThingPosition(thing));
+            if (!(distance < closestThingDistance)) return;
+            closestThingDistance = distance;
+            closestThing = thing;
+            found = true;
+        });
+        
+        return (found, closestThing);
     }
 }

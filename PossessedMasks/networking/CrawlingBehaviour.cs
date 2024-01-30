@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace PossessedMasks.networking;
 
@@ -69,5 +68,22 @@ public class CrawlingBehaviour : NetworkBehaviour
         if (!objRef.TryGet(out var networkObject)) return;
         var obj = networkObject.gameObject.GetComponent<GrabbableObject>();
         obj.enabled = state;
+    }
+
+    [ServerRpc]
+    public void SetEyesFilledServerRpc(NetworkObjectReference maskRef, bool state)
+    {
+        SetEyesFilledClientRpc(maskRef, state);
+    }
+
+    [ClientRpc]
+    private void SetEyesFilledClientRpc(NetworkObjectReference maskRef, bool state)
+    {
+        if (!maskRef.TryGet(out var networkObject)) return;
+        var obj = networkObject.gameObject.GetComponent<GrabbableObject>();
+        if (obj is HauntedMaskItem mask)
+        {
+            mask.maskEyesFilled.enabled = state;
+        }
     }
 }
