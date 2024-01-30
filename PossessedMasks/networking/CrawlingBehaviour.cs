@@ -86,4 +86,25 @@ public class CrawlingBehaviour : NetworkBehaviour
             mask.maskEyesFilled.enabled = state;
         }
     }
+
+    [ServerRpc]
+    public void PossessUponPickupServerRpc(NetworkObjectReference maskRef)
+    {
+        PossessUponPickupClientRpc(maskRef);
+    }
+
+    [ClientRpc]
+    private void PossessUponPickupClientRpc(NetworkObjectReference maskRef)
+    {
+        if (!maskRef.TryGet(out var networkObject)) return;
+        var mask = networkObject.gameObject.GetComponent<HauntedMaskItem>();
+        StartCoroutine(DelayedPossessUponPickup(mask));
+    }
+
+    private static IEnumerator DelayedPossessUponPickup(HauntedMaskItem mask)
+    {
+        yield return new WaitUntil(() => mask.playerHeldBy);
+        yield return new WaitForEndOfFrame();
+        mask.BeginAttachment();
+    }
 }
