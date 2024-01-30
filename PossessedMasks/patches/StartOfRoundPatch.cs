@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using PossessedMasks.mono;
+using PossessedMasks.networking;
 using Unity.Netcode;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -40,16 +41,11 @@ public class StartOfRoundPatch
             Utils.RegisterAll();
         }
     }
-    
-    [HarmonyPatch(nameof(StartOfRound.OnShipLandedMiscEvents)), HarmonyPostfix]
-    private static void OnShipLandedMiscEventsPostfix()
+
+    [HarmonyPatch(nameof(StartOfRound.ShipHasLeft)), HarmonyPostfix]
+    private static void ShipHasLeftPostfix(StartOfRound __instance)
     {
-        // client only instructions
-        if (Utils.HostCheck)
-        {
-            // find all ai nodes on the map
-            Utils.InsideAINodes = GameObject.FindGameObjectsWithTag("AINode");
-            Utils.OutsideAINodes = GameObject.FindGameObjectsWithTag("OutsideAINode");
-        }
+        if (CrawlingBehaviour.Instance)
+            CrawlingBehaviour.Instance.StopAllCoroutines();
     }
 }
