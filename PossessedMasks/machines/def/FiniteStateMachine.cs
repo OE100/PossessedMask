@@ -20,7 +20,7 @@ public sealed class FiniteStateMachine<TState, TData>(TData data)
         _stateActions[state] = function;
     }
 
-    public void Reset()
+    private void Reset()
     {
         SwitchStates(default);
     }
