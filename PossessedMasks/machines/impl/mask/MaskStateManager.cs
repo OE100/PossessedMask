@@ -23,8 +23,8 @@ public class MaskStateManager : MonoBehaviour
 
         public NavMeshPath Path; 
         
-        public float TimeBetweenRetargets = 2f;
-        public float TimeUntilRetarget;
+        public const float TimeBetweenRetargets = 1f;
+        public float TimeUntilRetarget = TimeBetweenRetargets;
         
         public bool Warped = false;
         
@@ -219,13 +219,28 @@ public class MaskStateManager : MonoBehaviour
             data.TimeAroundPlayer = 0f;
         }
 
+        data.TimeUntilRetarget -= Time.deltaTime;
+        
         var pt = data.TargetPlayer.transform;
         var mt = data.Mask.transform;
+
+        if (data.TimeUntilRetarget <= 0f)
+        {
+            if (!Physics.Raycast(pt.position + Vector3.up * 2, -1 * (pt.up + pt.forward), out var hit, float.MaxValue, Physics.DefaultRaycastLayers))
+                return State.ChooseTarget;
+            if (!NavMesh.SamplePosition(hit.point, out data.Hit, float.MaxValue, NavMesh.AllAreas))
+                return State.ChooseTarget;
+
+            data.Path = new NavMeshPath();
+            if (!data.Agent.CalculatePath(data.Hit.position, data.Path)) return State.ChooseTarget;
+            data.Agent.SetPath(data.Path);
+                
+            data.TimeUntilRetarget = Data.TimeBetweenRetargets;
+        }
+        
         var distance = Vector3.Distance(mt.position, pt.position);
         if (distance < 15) data.TimeAroundPlayer += Time.deltaTime;
-        else if (distance > 40) return State.Flank;
-
-        // target new location behind player
+        else if (distance > 40) return State.ChooseTarget;
         
         
         return data.TimeAroundPlayer > 10f ? State.Primed : State.Lurk;
@@ -241,16 +256,14 @@ public class MaskStateManager : MonoBehaviour
     
     private static State Wait(State previousState, Data data)
     {
-        if (data.Mask.playerHeldBy)
+        var heldByPlayer = data.Mask.playerHeldBy != null;
+        if (data.IsPrimed)
         {
-            if (data.IsPrimed)
-            {
-                // todo: possess player
-            }
-
+            if (heldByPlayer && !data.Mask.attaching)
+                CrawlingBehaviour.Instance.AttachServerRpc(data.Mask.NetworkObject);
             return State.Wait;
         }
-
-        return State.Initial;
+        
+        return heldByPlayer ? State.Wait : State.Initial;
     }
 }

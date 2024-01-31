@@ -88,22 +88,21 @@ public class CrawlingBehaviour : NetworkBehaviour
     }
 
     [ServerRpc]
-    public void PossessUponPickupServerRpc(NetworkObjectReference maskRef)
+    public void AttachServerRpc(NetworkObjectReference maskRef)
     {
-        PossessUponPickupClientRpc(maskRef);
+        AttachClientRpc(maskRef);
     }
 
     [ClientRpc]
-    private void PossessUponPickupClientRpc(NetworkObjectReference maskRef)
+    private void AttachClientRpc(NetworkObjectReference maskRef)
     {
         if (!maskRef.TryGet(out var networkObject)) return;
         var mask = networkObject.gameObject.GetComponent<HauntedMaskItem>();
-        StartCoroutine(DelayedPossessUponPickup(mask));
+        StartCoroutine(DelayedAttach(mask));
     }
 
-    private static IEnumerator DelayedPossessUponPickup(HauntedMaskItem mask)
+    private static IEnumerator DelayedAttach(HauntedMaskItem mask)
     {
-        yield return new WaitUntil(() => mask.playerHeldBy);
         yield return new WaitForEndOfFrame();
         mask.BeginAttachment();
     }
