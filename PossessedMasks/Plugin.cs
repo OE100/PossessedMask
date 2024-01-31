@@ -83,7 +83,14 @@ public class Plugin : BaseUnityPlugin
                 var attributes = method.GetCustomAttributes(typeof(RuntimeInitializeOnLoadMethodAttribute), false);
                 if (attributes.Length > 0)
                 {
-                    method.Invoke(null, null);
+                    try
+                    {
+                        method.Invoke(null, null);
+                    } 
+                    catch (Exception e)
+                    {
+                        Log.LogError($"Failed to invoke method {method.Name}: {e}");
+                    }
                 }
             }
         }
