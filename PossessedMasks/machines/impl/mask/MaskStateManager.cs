@@ -2,6 +2,7 @@
 using GameNetcodeStuff;
 using PossessedMasks.machines.Def;
 using PossessedMasks.networking;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -52,17 +53,21 @@ public class MaskStateManager : MonoBehaviour
 
     private Data _data;
     private FiniteStateMachine<State, Data> _finiteStateMachine;
+    private NetworkObject _networkObject;
 
     private void Awake()
     {
         _data = new Data();
         Initialize();
+        _networkObject = gameObject.GetComponent<NetworkObject>();
         _finiteStateMachine = new FiniteStateMachine<State, Data>(_data);
         AssignFunctions();
     }
 
     private void Update()
     {
+        CrawlingBehaviour.Instance.SyncLocationServerRpc(_networkObject, 
+            _networkObject.transform.position, _networkObject.transform.rotation);
         _finiteStateMachine?.Tick();
     }
     
@@ -95,7 +100,6 @@ public class MaskStateManager : MonoBehaviour
     {
         _data.Agent.agentTypeID = _data.DemoAgent.agentTypeID;
         _data.Agent.baseOffset = _data.Agent.baseOffset;
-        _data.Agent.speed = _data.DemoAgent.speed / 2;
         _data.Agent.acceleration = _data.DemoAgent.acceleration / 2;
         _data.Agent.angularSpeed = _data.DemoAgent.angularSpeed / 2;
         _data.Agent.stoppingDistance = _data.DemoAgent.stoppingDistance / 2;
