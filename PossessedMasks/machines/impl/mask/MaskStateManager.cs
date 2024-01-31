@@ -26,9 +26,8 @@ public class MaskStateManager : MonoBehaviour
         public const float TimeBetweenRetargets = 1f;
         public float TimeUntilRetarget = TimeBetweenRetargets;
         
-        public bool Warped = false;
-        
         public bool Inside;
+        public bool Active;
         
         public GameObject AINode;
         
@@ -134,8 +133,10 @@ public class MaskStateManager : MonoBehaviour
     // state functions
     private static State Initial(State previousState, Data data)
     {
+        if (!data.Active) return State.Initial;
         if (!data.Mask.hasHitGround) return State.Initial;
-        
+
+        data.Active = false;
         data.Inside = data.Mask.previousPlayerHeldBy.isInsideFactory;
         NavMesh.SamplePosition(data.Mask.transform.position, out data.Hit, float.MaxValue, NavMesh.AllAreas);
         CrawlingBehaviour.Instance.SyncLocationServerRpc(data.Mask.NetworkObject, data.Hit.position, data.Mask.transform.rotation);
@@ -263,6 +264,8 @@ public class MaskStateManager : MonoBehaviour
                 CrawlingBehaviour.Instance.AttachServerRpc(data.Mask.NetworkObject);
             return State.Wait;
         }
+        
+        data.Active = true;
         
         return heldByPlayer ? State.Wait : State.Initial;
     }
