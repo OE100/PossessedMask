@@ -1,9 +1,8 @@
 ﻿using GameNetcodeStuff;
-using JetBrains.Annotations;
 using PossessedMasks.mono;
 using Unity.Netcode;
 using UnityEngine;
-using Object = UnityEngine.Object;
+using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
 namespace PossessedMasks;
@@ -24,22 +23,17 @@ public static class Utils
     public static bool InLevel =>
         StartOfRound.Instance && !StartOfRound.Instance.inShipPhase && StartOfRound.Instance.currentLevelID != 3;
 
-    public static GameObject[] InsideAINodes;
-    public static GameObject[] OutsideAINodes;
-    
-    public static void RegisterEnemyPrefab(Type enemyAI, GameObject prefab)
+    public static List<GameObject> InsideAINodes;
+    public static List<GameObject> OutsideAINodes;
+
+    private static void RegisterEnemyPrefab(Type enemyAI, GameObject prefab)
     {
         if (!typeof(EnemyAI).IsAssignableFrom(enemyAI)) return;
         EnemyPrefabRegistry.TryAdd(enemyAI, prefab);
     }
-    
-    public static void RegisterAll()
+
+    private static void SetComedyAndTragedy()
     {
-        if (_registered || Terminal == null || StartOfRound.Instance == null) return;
-        _registered = true;
-        
-        Plugin.Log.LogMessage("Registering all!");
-        
         ComedyItem = StartOfRound.Instance.allItemsList.itemsList.FirstOrDefault(item => item.itemName == "Comedy");
         TragedyItem = StartOfRound.Instance.allItemsList.itemsList.FirstOrDefault(item => item.itemName == "Tragedy");
         
@@ -61,7 +55,10 @@ public static class Utils
             TragedyItem.minValue = ModConfig.MinMaskItemBaseValue.Value;
             TragedyItem.maxValue = ModConfig.MaxMaskItemBaseValue.Value;
         }
-        
+    }
+
+    private static void TweakSpawnChanceAndMoons()
+    {
         var moons = Terminal.moonsCatalogueList;
         var addPercent = ModConfig.MaskRarityScalingMultiplier.Value;
         
@@ -79,46 +76,41 @@ public static class Utils
             if (ModConfig.EnableChangeMaskSpawnChance.Value == 0) continue;
             
             // make masks spawnable on all moons and change rarity
-            if (ComedyItem)
-            {
-                var comedyWithRarity = new SpawnableItemWithRarity
-                {
-                    spawnableItem = ComedyItem,
-                    rarity = rarity
-                };
-
-                var levelIndex =
-                    level.spawnableScrap.FindIndex(item => item.spawnableItem.itemName == ComedyItem.itemName);
-                
-                if (levelIndex == -1)
-                {
-                    if (ModConfig.EnableChangeMaskSpawnChance.Value == 2)
-                        level.spawnableScrap.Add(comedyWithRarity);
-                }
-                else
-                    level.spawnableScrap[levelIndex] = comedyWithRarity;
-            }
-            
-            if (TragedyItem)
-            {
-                var tragedyWithRarity = new SpawnableItemWithRarity
-                {
-                    spawnableItem = TragedyItem,
-                    rarity = rarity
-                };
-
-                var levelIndex =
-                    level.spawnableScrap.FindIndex(item => item.spawnableItem.itemName == TragedyItem.itemName);
-                
-                if (levelIndex == -1)
-                {
-                    if (ModConfig.EnableChangeMaskSpawnChance.Value == 2)
-                        level.spawnableScrap.Add(tragedyWithRarity);
-                }
-                else
-                    level.spawnableScrap[levelIndex] = tragedyWithRarity;
-            }
+            SetMoonSpawn(ComedyItem, rarity, level);
+            SetMoonSpawn(TragedyItem, rarity, level);
         }
+
+        return;
+
+        void SetMoonSpawn(Item item, int rarity, SelectableLevel level)
+        {
+            if (!item) return;
+            
+            var itemWithRarity = new SpawnableItemWithRarity
+            {
+                spawnableItem = item,
+                rarity = rarity
+            };
+            
+            var levelIndex = level.spawnableScrap.FindIndex(lvlItem => lvlItem.spawnableItem.itemName == item.itemName);
+
+            if (levelIndex != -1)
+                level.spawnableScrap[levelIndex] = itemWithRarity;
+            else if(ModConfig.EnableChangeMaskSpawnChance.Value == 2)
+                level.spawnableScrap.Add(itemWithRarity);
+        }
+    }
+    
+    public static void RegisterAll()
+    {
+        if (_registered || Terminal == null || StartOfRound.Instance == null) return;
+        _registered = true;
+        
+        Plugin.Log.LogMessage("Registering all!");
+        
+        SetComedyAndTragedy();
+        
+        TweakSpawnChanceAndMoons();
     }
 
     public static void PlayRandomAudioClipFromList(AudioSource source, List<AudioClip> clips, float volumeScale = 1f)
@@ -135,8 +127,7 @@ public static class Utils
 
     public static List<PlayerControllerB> GetActivePlayers(bool inside)
     {
-        if (!ServerManager.Instance) return [];
-        return ServerManager.Instance.ActivePlayers.FindAll(player => player.isInsideFactory == inside);
+        return ServerManager.Instance ? ServerManager.Instance.ActivePlayers.FindAll(player => player.isInsideFactory == inside) : [];
     }
     
     public static (bool, T) FindFarthestAwayThingFromPosition<T>(Vector3 position, 
@@ -177,5 +168,15 @@ public static class Utils
         });
         
         return (found, closestThing);
+    }
+
+    public static bool PathNotVisibleByPlayer(NavMeshPath path)
+    {
+        var corners = path.corners;
+        for (var i = 1; i < corners.Length; i++)
+            if (Physics.Linecast(corners[i - 1], corners[i], 262144))
+                return false;
+
+        return true;
     }
 }
