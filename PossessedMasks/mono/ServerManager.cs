@@ -172,11 +172,11 @@ public class ServerManager : MonoBehaviour
         for (var i = 0; i <= numOfSlots / 2; i++)
         {
             var checkInd = Utils.MathMod(active + i, numOfSlots);
-            if (player.ItemSlots[checkInd] != null && player.ItemSlots[checkInd] is HauntedMaskItem)
+            if (player.ItemSlots[checkInd] && player.ItemSlots[checkInd] is HauntedMaskItem)
                 return (checkInd, true);
 
             checkInd = Utils.MathMod(active - i, numOfSlots);
-            if (player.ItemSlots[checkInd] != null && player.ItemSlots[checkInd] is HauntedMaskItem)
+            if (player.ItemSlots[checkInd] && player.ItemSlots[checkInd] is HauntedMaskItem)
                 return (checkInd, false);
         }
 

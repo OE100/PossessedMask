@@ -1,13 +1,13 @@
 ﻿namespace PossessedMasks.machines.Def;
 
-public sealed class FiniteStateMachine<TState, TData>(TData data)
+public sealed class FiniteStateMachine<TState, TData>(TData data, TState initialState = default)
     where TState : Enum
 {
     private readonly Dictionary<TState, Func<TState, TData, TState>> _stateActions = new();
-    public Action<TState, TState, TData> PreTickActions;
-    
-    public TState PreviousState { get; private set; }
-    public TState CurrentState { get; private set; }
+    private Action<TState, TState, TData> PreTickActions { get; set; }
+
+    private TState PreviousState { get; set; } = initialState;
+    private TState CurrentState { get; set; } = initialState;
 
     public void AddPreTickAction(Action<TState, TState, TData> action)
     {
@@ -40,6 +40,8 @@ public sealed class FiniteStateMachine<TState, TData>(TData data)
 
     public void SwitchStates(TState newState)
     {
+        if (!CurrentState.Equals(newState))
+            Plugin.Log.LogDebug($"State changed from {CurrentState.ToString()} to {newState.ToString()}");
         PreviousState = CurrentState;
         CurrentState = newState;
     }

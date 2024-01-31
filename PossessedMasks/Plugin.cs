@@ -30,7 +30,7 @@ public class Plugin : BaseUnityPlugin
         Log = Logger;
         Log.LogInfo($"'{Name}' is loading...");
 
-        if (Instance == null)
+        if (!Instance)
             Instance = this;
         
         ModConfig.Init(Config);
@@ -38,7 +38,7 @@ public class Plugin : BaseUnityPlugin
         _ab = AssetBundle.LoadFromStream(Assembly.GetExecutingAssembly()
             .GetManifestResourceStream(Assembly.GetExecutingAssembly().GetManifestResourceNames()[0]));
 
-        if (_ab == null)
+        if (!_ab)
         {
             Log.LogError("Failed to load asset bundle");
             return;

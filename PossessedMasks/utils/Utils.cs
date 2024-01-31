@@ -103,7 +103,7 @@ public static class Utils
     
     public static void RegisterAll()
     {
-        if (_registered || Terminal == null || StartOfRound.Instance == null) return;
+        if (_registered || !Terminal || !StartOfRound.Instance) return;
         _registered = true;
         
         Plugin.Log.LogMessage("Registering all!");
@@ -123,7 +123,7 @@ public static class Utils
     public static bool IsActivePlayer(PlayerControllerB player) => player && player.isPlayerControlled && !player.isPlayerDead;
 
     public static int ItemCount(PlayerControllerB player) => 
-        player.ItemSlots.Count(item => item != null);
+        player.ItemSlots.Count(item => item);
 
     public static List<PlayerControllerB> GetActivePlayers(bool inside)
     {

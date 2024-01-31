@@ -1,4 +1,5 @@
-﻿using GameNetcodeStuff;
+﻿using System.Collections;
+using GameNetcodeStuff;
 using PossessedMasks.machines.Def;
 using PossessedMasks.networking;
 using UnityEngine;
@@ -52,12 +53,12 @@ public class MaskStateManager : MonoBehaviour
     private Data _data;
     private FiniteStateMachine<State, Data> _finiteStateMachine;
 
-    private void Start()
+    private void Awake()
     {
         _data = new Data();
         Initialize();
-        AssignFunctions();
         _finiteStateMachine = new FiniteStateMachine<State, Data>(_data);
+        AssignFunctions();
     }
 
     private void Update()
@@ -137,17 +138,22 @@ public class MaskStateManager : MonoBehaviour
         if (!data.Mask.hasHitGround) return State.Initial;
 
         data.Active = false;
+        CrawlingBehaviour.Instance.SetObjStateServerRpc(data.Mask.NetworkObject, false);
         data.Inside = data.Mask.previousPlayerHeldBy.isInsideFactory;
-        NavMesh.SamplePosition(data.Mask.transform.position, out data.Hit, float.MaxValue, NavMesh.AllAreas);
+        Plugin.Log.LogDebug($"Found navmesh hit: {NavMesh.SamplePosition(data.Mask.transform.position, out data.Hit, float.MaxValue, NavMesh.AllAreas)}");
         CrawlingBehaviour.Instance.SyncLocationServerRpc(data.Mask.NetworkObject, data.Hit.position, data.Mask.transform.rotation);
+        data.Agent.speed = data.DemoAgent.speed * 2.5f;
+        data.Agent.enabled = true;
         data.Agent.Warp(data.Hit.position);
         data.TargetPlayer = null;
+        data.AINode = null;
         
         return State.ChooseNode;
     }
     
     private static State ChooseNode(State previousState, Data data)
     {
+        data.Agent.speed = data.DemoAgent.speed * 2.5f;
         var position = data.Mask.transform.position;
         
         var sorted = (data.Inside ? Utils.InsideAINodes : Utils.OutsideAINodes)
@@ -157,7 +163,8 @@ public class MaskStateManager : MonoBehaviour
         var found = false;
         for (var i = 0; !found && i < sorted.Count; i++)
         {
-            if (!data.Agent.CalculatePath(sorted[i].transform.position, data.Path)) continue;
+            if (!NavMesh.SamplePosition(sorted[i].transform.position, out data.Hit, 20f, NavMesh.AllAreas)) continue;
+            if (!data.Agent.CalculatePath(data.Hit.position, data.Path)) continue;
             if (!Utils.PathNotVisibleByPlayer(data.Path)) continue;
             data.AINode = sorted[i];
             found = true;
@@ -168,17 +175,29 @@ public class MaskStateManager : MonoBehaviour
 
     private static State GoToNode(State previousState, Data data)
     {
+        CrawlingBehaviour.Instance.SetEyesFilledServerRpc(data.Mask.NetworkObject, false);
         if (previousState != State.GoToNode)
-        {
-            data.Agent.enabled = true;
             data.Agent.SetPath(data.Path);
-        }
-
-        if (Vector3.Distance(data.Mask.transform.position, data.AINode.transform.position) > 20f)
+        
+        // try to see if there's a door lock in front of us
+        var at = data.Agent.transform;
+        if (Physics.Raycast(at.position, at.forward, out var hit, 5f, Physics.DefaultRaycastLayers))
+            if (hit.transform.gameObject.TryGetComponent(out DoorLock doorLock))
+                CrawlingBehaviour.Instance.StartCoroutine(DoorHandler(doorLock));
+        
+        if (Vector3.Distance(data.Mask.transform.position, data.Path.corners[^1]) > 5f)
             return State.GoToNode;
         
-        data.Agent.enabled = false;
         return State.ChooseTarget;
+
+        IEnumerator DoorHandler(DoorLock doorLock)
+        {
+            var obstacle = doorLock.navMeshObstacle;
+            if (!obstacle.enabled) yield break;
+            obstacle.enabled = false;
+            yield return new WaitForSeconds(1f);
+            obstacle.enabled = true;
+        }
     }
 
     private static State ChooseTarget(State previousState, Data data)
@@ -193,9 +212,11 @@ public class MaskStateManager : MonoBehaviour
         for (var i = 0; !found && i < sorted.Count; i++)
         {
             if (!data.Agent.CalculatePath(sorted[i].transform.position, data.Path)) continue;
-            if (!Utils.PathNotVisibleByPlayer(data.Path)) continue;
+            // if (!Utils.PathNotVisibleByPlayer(data.Path)) continue;
+            // todo: find a better way of making a path not visible by player
             data.TargetPlayer = sorted[i];
             found = true;
+            CrawlingBehaviour.Instance.SetEyesFilledServerRpc(data.Mask.NetworkObject, true);
         }
 
         return found ? State.Flank : State.ChooseTarget;
@@ -205,26 +226,32 @@ public class MaskStateManager : MonoBehaviour
     {
         if (previousState != State.Flank)
         {
+            data.Agent.speed = data.DemoAgent.speed * 1.5f;
             data.Agent.enabled = true;
             data.Agent.SetPath(data.Path);
         }
-        
-        return Vector3.Distance(data.Mask.transform.position, data.TargetPlayer.transform.position) < 40f ? State.Lurk : State.Flank;
+
+        var distance = Vector3.Distance(data.Mask.transform.position, data.Path.corners[^1]);
+        if (distance <= 40 && data.Path.status == NavMeshPathStatus.PathComplete) return State.Lurk;
+        if (distance > 40) return State.Flank;
+        return State.ChooseTarget;
     }
     
     private static State Lurk(State previousState, Data data)
     {
         if (previousState != State.Lurk)
         {
-            data.Agent.enabled = false;
+            data.Agent.speed = data.DemoAgent.speed;
             data.TimeAroundPlayer = 0f;
         }
-
+        
         data.TimeUntilRetarget -= Time.deltaTime;
         
         var pt = data.TargetPlayer.transform;
         var mt = data.Mask.transform;
 
+        if (data.TargetPlayer.HasLineOfSightToPosition(mt.position, width: 15, range: 10)) return State.ChooseNode;
+        
         if (data.TimeUntilRetarget <= 0f)
         {
             if (!Physics.Raycast(pt.position + Vector3.up * 2, -1 * (pt.up + pt.forward), out var hit, float.MaxValue, Physics.DefaultRaycastLayers))
@@ -240,8 +267,14 @@ public class MaskStateManager : MonoBehaviour
         }
         
         var distance = Vector3.Distance(mt.position, pt.position);
-        if (distance < 15) data.TimeAroundPlayer += Time.deltaTime;
-        else if (distance > 40) return State.ChooseTarget;
+        switch (distance)
+        {
+            case < 15:
+                data.TimeAroundPlayer += Time.deltaTime;
+                break;
+            case > 40:
+                return State.ChooseTarget;
+        }
         
         
         return data.TimeAroundPlayer > 10f ? State.Primed : State.Lurk;
@@ -257,14 +290,15 @@ public class MaskStateManager : MonoBehaviour
     
     private static State Wait(State previousState, Data data)
     {
-        var heldByPlayer = data.Mask.playerHeldBy != null;
+        bool heldByPlayer = data.Mask.playerHeldBy;
         if (data.IsPrimed)
         {
             if (heldByPlayer && !data.Mask.attaching)
                 CrawlingBehaviour.Instance.AttachServerRpc(data.Mask.NetworkObject);
             return State.Wait;
         }
-        
+
+        data.Mask.enabled = true;
         data.Active = true;
         
         return heldByPlayer ? State.Wait : State.Initial;
