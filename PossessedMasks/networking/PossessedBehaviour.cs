@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using Random = UnityEngine.Random;
 
 namespace PossessedMasks.networking;
@@ -151,23 +150,5 @@ public class PossessedBehaviour : NetworkBehaviour
         // enable some actions
         localPlayer.playerActions.FindAction("ActivateItem").Enable();
         localPlayer.playerActions.FindAction("SwitchItem").Enable();
-    } 
-
-    internal static void Discard_with_check_performed(InputAction.CallbackContext context)
-    {
-        var localPlayer = StartOfRound.Instance.localPlayerController;
-        var heldObject = localPlayer.currentlyHeldObjectServer;
-        if (Utils.InLevel && heldObject is HauntedMaskItem &&
-            Utils.ItemCount(localPlayer) < SharedConfig.ItemCount) return;
-        localPlayer.Discard_performed(context);
-    }
-
-    internal static void Interact_with_check_performed(InputAction.CallbackContext context)
-    {
-        var localPlayer = StartOfRound.Instance.localPlayerController;
-        var heldObject = localPlayer.currentlyHeldObjectServer;
-        if (Utils.InLevel && heldObject is HauntedMaskItem &&
-            (localPlayer.activatingItem || Utils.ItemCount(localPlayer) < SharedConfig.ItemCount)) return;
-        localPlayer.Interact_performed(context);
     }
 }
