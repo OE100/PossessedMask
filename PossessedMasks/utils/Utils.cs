@@ -95,7 +95,12 @@ public static class Utils
             var levelIndex = level.spawnableScrap.FindIndex(lvlItem => lvlItem.spawnableItem.itemName == item.itemName);
 
             if (levelIndex != -1)
-                level.spawnableScrap[levelIndex] = itemWithRarity;
+            {
+                if (ModConfig.EnableChangeMaskSpawnChance.Value == 3)
+                    level.spawnableScrap[levelIndex].spawnableItem = itemWithRarity.spawnableItem;
+                else
+                    level.spawnableScrap[levelIndex] = itemWithRarity;
+            }
             else if(ModConfig.EnableChangeMaskSpawnChance.Value == 2)
                 level.spawnableScrap.Add(itemWithRarity);
         }

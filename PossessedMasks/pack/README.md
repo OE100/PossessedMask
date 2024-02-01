@@ -5,6 +5,10 @@ Tweaks spawn chances of masks to allow them to spawn on all moons.
 
 # Releases
 
+# Version 2.0.4
+- Fixed a bug where inventory would freeze on dropping an item sometimes for some reason.
+- Added config option to change the value of masks without the spawn chance. (EnableChangeMaskSpawnChance = 3)
+
 # Version 2.0.3
 - Fixed config sync not working correctly, this should fix the issue where you could drop the mask regardless of how many items you had in your inventory.
 

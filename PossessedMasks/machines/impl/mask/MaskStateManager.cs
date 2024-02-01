@@ -21,7 +21,8 @@ public class MaskStateManager : MonoBehaviour
         public NavMeshAgent DemoAgent;
 
         // variables
-        public Quaternion OriginalRotation;
+        public Quaternion OrigRotation;
+        public Transform Mesh;
 
         public NavMeshPath Path; 
         
@@ -74,7 +75,8 @@ public class MaskStateManager : MonoBehaviour
     private void Initialize()
     {
         // get components
-        _data.OriginalRotation = gameObject.transform.rotation;
+        _data.OrigRotation = gameObject.transform.rotation;
+        _data.Mesh = transform.Find("MaskMesh");
         
         if (!gameObject.TryGetComponent(out _data.Agent)) 
             (_data.Agent = gameObject.AddComponent<NavMeshAgent>()).enabled = false;
@@ -145,12 +147,14 @@ public class MaskStateManager : MonoBehaviour
         CrawlingBehaviour.Instance.SetObjStateServerRpc(data.Mask.NetworkObject, false);
         data.Inside = data.Mask.previousPlayerHeldBy.isInsideFactory;
         Plugin.Log.LogDebug($"Found navmesh hit: {NavMesh.SamplePosition(data.Mask.transform.position, out data.Hit, float.MaxValue, NavMesh.AllAreas)}");
-        CrawlingBehaviour.Instance.SyncLocationServerRpc(data.Mask.NetworkObject, data.Hit.position, data.Mask.transform.rotation);
-        data.Agent.speed = data.DemoAgent.speed * 2.5f;
+        data.Agent.speed = data.DemoAgent.speed * 2f;
         data.Agent.enabled = true;
         data.Agent.Warp(data.Hit.position);
         data.TargetPlayer = null;
         data.AINode = null;
+        data.Mesh.Translate(Vector3.up * 2);
+        CrawlingBehaviour.Instance.SyncLocationServerRpc(data.Mask.NetworkObject, data.Hit.position, data.Mask.transform.rotation);
+        // todo: add renderer offset sync
         
         return State.ChooseNode;
     }
@@ -288,12 +292,14 @@ public class MaskStateManager : MonoBehaviour
     {
         data.IsPrimed = true;
         data.Agent.enabled = false;
-        data.Mask.transform.rotation = data.OriginalRotation;
+        data.Mask.transform.rotation = data.OrigRotation;
+        data.Mesh.SetPositionAndRotation(Vector3.zero, data.Mesh.rotation);
         return State.Wait;
     }
     
     private static State Wait(State previousState, Data data)
     {
+        data.Mesh.SetPositionAndRotation(Vector3.zero, data.Mesh.rotation);
         bool heldByPlayer = data.Mask.playerHeldBy;
         if (data.IsPrimed)
         {
@@ -301,7 +307,7 @@ public class MaskStateManager : MonoBehaviour
                 CrawlingBehaviour.Instance.AttachServerRpc(data.Mask.NetworkObject);
             return State.Wait;
         }
-
+        
         data.Mask.enabled = true;
         data.Active = true;
         

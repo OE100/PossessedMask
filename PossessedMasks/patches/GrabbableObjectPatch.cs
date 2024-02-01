@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using PossessedMasks.machines.impl.mask;
 
 namespace PossessedMasks.patches;
 
