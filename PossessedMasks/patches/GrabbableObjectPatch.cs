@@ -11,8 +11,9 @@ public class GrabbableObjectPatch
     {
         if (!Utils.HostCheck) return;
         if (!SharedConfig.LurkingMechanicEnabled) return;
-
-        if (__instance is HauntedMaskItem)
-            __instance.gameObject.AddComponent<MaskStateManager>();
+        
+        // todo: enable when ready
+        // if (__instance is HauntedMaskItem)
+        //     __instance.gameObject.AddComponent<MaskStateManager>();
     }
 }
