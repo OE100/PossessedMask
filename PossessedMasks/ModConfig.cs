@@ -2,13 +2,12 @@
 
 namespace PossessedMasks;
 
-public class ModConfig
+public static class ModConfig
 {
     internal static bool Loaded { get; private set; }
     
     internal static ConfigEntry<bool> EnableMaskPossessionMechanic; // if true, mask possession mechanic will be enabled
     internal static ConfigEntry<bool> EnableMaskSwitchSlotMechanic; // if true, mask switching to your active slot mechanic will be enabled
-    internal static ConfigEntry<bool> EnableMaskLurkingMechanic; // if true, mask lurking mechanic will be enabled
     internal static ConfigEntry<int> EnableChangeMaskSpawnChance; // if 0, will not override mask spawn chance, scrap value and available levels. if 1, will override spawn chance, scrap value but not available levels, if 2 will override all of them, if 3 will override value but non of the other stuff.
     
     internal static ConfigEntry<int> NumberOfSlotsFilledToEnableDroppingMask; // number of slots filled to enable dropping mask (-1 to disable) 
@@ -45,7 +44,6 @@ public class ModConfig
     {
         EnableMaskPossessionMechanic = config.Bind("Mechanics", "EnableMaskPossessionMechanic", true, "If true, mask possession mechanic will be enabled");
         EnableMaskSwitchSlotMechanic = config.Bind("Mechanics", "EnableMaskSwitchSlotMechanic", true, "If true, mask switching to your active slot mechanic will be enabled");
-        EnableMaskLurkingMechanic = config.Bind("Mechanics", "EnableMaskLurkingMechanic", true, "If true, mask lurking mechanic will be enabled");
         EnableChangeMaskSpawnChance = config.Bind("Mechanics", "EnableChangeMaskSpawnChance", 2, "If 0, will not override mask spawn chance, scrap value and available levels.\nIf 1, will override spawn chance, scrap value but not available levels.\nif 2 will override all of them.\nif 3 will override value but non of the other stuff");
         
         NumberOfSlotsFilledToEnableDroppingMask = config.Bind("General", "NumberOfSlotsFilledToEnableDroppingMask", 3, "Number of inventory slots that need to be filled to enable dropping a mask");

@@ -41,11 +41,4 @@ public class StartOfRoundPatch
             Utils.RegisterAll();
         }
     }
-
-    [HarmonyPatch(nameof(StartOfRound.ShipHasLeft)), HarmonyPostfix]
-    private static void ShipHasLeftPostfix(StartOfRound __instance)
-    {
-        if (CrawlingBehaviour.Instance)
-            CrawlingBehaviour.Instance.StopAllCoroutines();
-    }
 }

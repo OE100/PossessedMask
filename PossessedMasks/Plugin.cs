@@ -55,10 +55,6 @@ public class Plugin : BaseUnityPlugin
         possessedBehaviour.AddComponent<PossessedBehaviour>();
         NetworkPrefabs.Add(possessedBehaviour);
         
-        var crawlingBehaviour = LethalLib.Modules.NetworkPrefabs.CreateNetworkPrefab("CrawlingBehaviour");
-        crawlingBehaviour.AddComponent<CrawlingBehaviour>();
-        NetworkPrefabs.Add(crawlingBehaviour);
-        
         InitializeNetworkRoutine();
         
         harmony.PatchAll();
