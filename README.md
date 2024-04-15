@@ -5,6 +5,10 @@ Tweaks spawn chances of masks to allow them to spawn on all moons.
 
 # Releases
 
+# Version 2.1.0
+- Changed the behaviour to not affect masks with `maskIsHaunted == False` to be more compatible with other mods.
+- The mod works for v50 btw.
+
 # Version 2.0.4
 - Fixed a bug where inventory would freeze on dropping an item sometimes for some reason.
 - Added config option to change the value of masks without the spawn chance. (EnableChangeMaskSpawnChance = 3)
