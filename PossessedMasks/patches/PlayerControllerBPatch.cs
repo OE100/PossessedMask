@@ -11,7 +11,8 @@ public class PlayerControllerBPatch
     {
         var localPlayer = StartOfRound.Instance.localPlayerController;
         var heldObject = localPlayer.currentlyHeldObjectServer;
-        if (Utils.InLevel && heldObject is HauntedMaskItem && Utils.ItemCount(localPlayer) < SharedConfig.ItemCount) 
+        if (Utils.InLevel && heldObject is HauntedMaskItem {maskIsHaunted: true} && 
+            Utils.ItemCount(localPlayer) < SharedConfig.ItemCount) 
             return false;
         return true;
     }
@@ -21,7 +22,7 @@ public class PlayerControllerBPatch
     {
         var localPlayer = StartOfRound.Instance.localPlayerController;
         var heldObject = localPlayer.currentlyHeldObjectServer;
-        if (Utils.InLevel && heldObject is HauntedMaskItem && 
+        if (Utils.InLevel && heldObject is HauntedMaskItem {maskIsHaunted: true} && 
             (localPlayer.activatingItem || Utils.ItemCount(localPlayer) < SharedConfig.ItemCount)) 
             return false;
         return true;
